@@ -1,0 +1,11 @@
+node_modules/
+.next/
+out/
+cloudflared.exe
+assets/_*.log
+assets/_*.png
+.claude/
+_pagesim/
+
+# Dropbox crawl / matching scratch data
+scripts/out/
