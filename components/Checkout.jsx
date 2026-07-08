@@ -22,6 +22,11 @@ const PRODUCT_NAMES = { xc: "Cross Country Video", sj: "Show Jumping Video", fen
 const TIER_RANK = { instant: 0, fast: 1, standard: 2 };
 const CUR = { us: "$", ie: "€", fr: "€", be: "€" };
 
+/* When a checkout API is configured (Vercel deploy), "pay" hands off to Stripe
+   Checkout — cards never touch this site. Without it (GitHub Pages demo) the
+   simulated flow below runs unchanged. */
+const CHECKOUT_API = process.env.NEXT_PUBLIC_CHECKOUT_API || "";
+
 function promiseDate(tier) {
   if (tier === "instant") return "ready now";
   if (tier === "fast") return "within the hour";
@@ -127,6 +132,49 @@ export default function Checkout({ order, onClose, onComplete }) {
   }
 
   const wantsDVD = dvd;
+
+  /* real payment: server re-prices everything and returns a Stripe Checkout
+     URL; personalisation travels in session metadata to the order record */
+  async function payLive() {
+    const e2 = {};
+    if (!/.+@.+\..+/.test(email)) e2.email = 1;
+    if (wantsDVD && address.trim().length < 8) e2.address = 1;
+    if (Object.keys(e2).length) { setErrs(e2); return; }
+    setErrs({});
+    purchases.setEmail(email);
+    prefs.set(Object.assign(prefs.get(), { faults: p.faults, music: p.music, sounds: p.sounds, public: p.public, flag }));
+    setBusy("card");
+    try {
+      const payload = {
+        email, dvd: wantsDVD, address: wantsDVD ? address : "",
+        items: items.map((it) => {
+          const rp = it.pref || orderPref();
+          return {
+            e: it.ev.id,
+            b: it.en ? it.en.bib : "", h: horseOf(it), r: riderOf(it),
+            d: it.en ? it.en.xcDay : "", t: it.en ? it.en.xcTime : "",
+            p: it.product, sjAdd: it.product === "xc" && !!it.addSJ, rl: it.product === "xc" && !!it.addReel,
+            f: it.fence && it.fence.num ? it.fence.num : "",
+            pr: { fl: rp.flag, fa: rp.faults, mu: rp.music, so: rp.sounds, pu: rp.public }
+          };
+        })
+      };
+      const r = await fetch(CHECKOUT_API + "/create-checkout", {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload)
+      });
+      const data = await r.json().catch(() => ({}));
+      if (r.ok && data.url) {
+        items.forEach((it) => { if (it.en) basket.remove(it.en.id); });
+        window.location.href = data.url;
+        return;
+      }
+      setBusy("");
+      setErrs({ api: data.message || "We couldn't start the payment — please try again in a moment." });
+    } catch (err) {
+      setBusy("");
+      setErrs({ api: "We couldn't reach the payment service — please check your connection and try again." });
+    }
+  }
 
   function complete(express) {
     const e2 = {};
@@ -269,25 +317,42 @@ export default function Checkout({ order, onClose, onComplete }) {
               <p className="co2-note">{p.public ? "Public videos may be featured on our social media." : "Private — only you receive the link."}</p>
             </div>
 
-            <button className="co2-express" disabled={!!busy} onClick={() => complete(true)}>
-              {busy === "express" ? "Confirming…" : "⚡ Express Checkout"}
-            </button>
-            <div className="co2-divider">or pay with card</div>
-            <label className="co2-label">Email for your video{multi ? "s" : ""}</label>
-            <input type="email" className={errs.email ? "field-err" : ""} value={email} placeholder="you@example.com"
-              autoComplete="email" onChange={(e) => setEmail(e.target.value)} />
-            <label className="co2-label">Card details</label>
-            <div className="co2-cardrow">
-              <input type="text" inputMode="numeric" className={errs.card ? "field-err" : ""} placeholder="1234 5678 9012 3456"
-                value={card} onChange={(e) => setCard(e.target.value.replace(/\D/g, "").slice(0, 16).replace(/(.{4})/g, "$1 ").trim())} />
-              <input type="text" inputMode="numeric" className={errs.exp ? "field-err" : ""} placeholder="MM/YY"
-                value={exp} onChange={(e) => { const v = e.target.value.replace(/\D/g, "").slice(0, 4); setExp(v.length > 2 ? v.slice(0, 2) + "/" + v.slice(2) : v); }} />
-              <input type="text" inputMode="numeric" className={errs.cvc ? "field-err" : ""} placeholder="CVC"
-                value={cvc} onChange={(e) => setCvc(e.target.value.replace(/\D/g, "").slice(0, 4))} />
-            </div>
-            <button className="btn primary big co2-pay" disabled={!!busy} onClick={() => complete(false)}>
-              {busy === "card" ? "Processing…" : "Pay " + totalStr}
-            </button>
+            {CHECKOUT_API ? (
+              <>
+                <label className="co2-label">Email for your video{multi ? "s" : ""}</label>
+                <input type="email" className={errs.email ? "field-err" : ""} value={email} placeholder="you@example.com"
+                  autoComplete="email" onChange={(e) => setEmail(e.target.value)} />
+                {errs.api && <p className="co2-apierr" role="alert">{errs.api}</p>}
+                <button className="btn primary big co2-pay" disabled={!!busy} onClick={payLive}>
+                  {busy ? "Opening secure checkout…" : "Pay " + totalStr}
+                </button>
+                <p className="co2-note" style={{ textAlign: "center" }}>
+                  Secure payment by Stripe — card, Apple Pay and Google Pay.
+                </p>
+              </>
+            ) : (
+              <>
+                <button className="co2-express" disabled={!!busy} onClick={() => complete(true)}>
+                  {busy === "express" ? "Confirming…" : "⚡ Express Checkout"}
+                </button>
+                <div className="co2-divider">or pay with card</div>
+                <label className="co2-label">Email for your video{multi ? "s" : ""}</label>
+                <input type="email" className={errs.email ? "field-err" : ""} value={email} placeholder="you@example.com"
+                  autoComplete="email" onChange={(e) => setEmail(e.target.value)} />
+                <label className="co2-label">Card details</label>
+                <div className="co2-cardrow">
+                  <input type="text" inputMode="numeric" className={errs.card ? "field-err" : ""} placeholder="1234 5678 9012 3456"
+                    value={card} onChange={(e) => setCard(e.target.value.replace(/\D/g, "").slice(0, 16).replace(/(.{4})/g, "$1 ").trim())} />
+                  <input type="text" inputMode="numeric" className={errs.exp ? "field-err" : ""} placeholder="MM/YY"
+                    value={exp} onChange={(e) => { const v = e.target.value.replace(/\D/g, "").slice(0, 4); setExp(v.length > 2 ? v.slice(0, 2) + "/" + v.slice(2) : v); }} />
+                  <input type="text" inputMode="numeric" className={errs.cvc ? "field-err" : ""} placeholder="CVC"
+                    value={cvc} onChange={(e) => setCvc(e.target.value.replace(/\D/g, "").slice(0, 4))} />
+                </div>
+                <button className="btn primary big co2-pay" disabled={!!busy} onClick={() => complete(false)}>
+                  {busy === "card" ? "Processing…" : "Pay " + totalStr}
+                </button>
+              </>
+            )}
           </>
         ) : (
           <div className="co2-done">

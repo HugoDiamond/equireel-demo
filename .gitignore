@@ -9,3 +9,8 @@ _pagesim/
 
 # Dropbox crawl / matching scratch data
 scripts/out/
+
+# secrets — never commit
+.env
+.env.*
+!.env.example

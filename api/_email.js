@@ -1,0 +1,80 @@
+/* Order emails via Resend (https://resend.com). Graceful no-op when
+   RESEND_API_KEY is unset — the webhook still records the order and logs what
+   it would have sent, so payments are never blocked on email config.
+
+   Env: RESEND_API_KEY, ORDERS_EMAIL_FROM (e.g. "Equireel <orders@equireel.com>"),
+        FULFILMENT_EMAIL (internal work-order inbox). */
+
+const PREF_LABEL = (pr) => {
+  if (!pr) return "defaults (faults in, music on, course sounds on, public)";
+  const bits = [];
+  bits.push(pr.fa === false ? "EXCLUDE faults" : "faults in");
+  bits.push(pr.mu === false ? "NO music" : "music on");
+  bits.push(pr.so === false ? "NO course sounds" : "course sounds on");
+  bits.push(pr.pu === false ? "PRIVATE" : "public ok");
+  if (pr.fl) bits.push("flag: " + String(pr.fl).toUpperCase());
+  return bits.join(", ");
+};
+
+async function send(to, subject, html) {
+  const key = process.env.RESEND_API_KEY;
+  const from = process.env.ORDERS_EMAIL_FROM || "Equireel <onboarding@resend.dev>";
+  if (!key) { console.log(`[email skipped — no RESEND_API_KEY] to=${to} subject=${subject}`); return; }
+  const r = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ from, to: [to], subject, html })
+  });
+  if (!r.ok) throw new Error(`resend ${r.status}: ${await r.text()}`);
+}
+
+const esc = (s) => String(s || "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const CUR = { GBP: "£", EUR: "€", USD: "$" };
+
+async function sendCustomerConfirmation({ session, items, order, rows, email, name, currency, receiptUrl }) {
+  if (!email) return;
+  const sym = CUR[currency] || "£";
+  const total = Math.round((session.amount_total || 0) / 100);
+  const lines = rows.map((r) =>
+    `<tr><td style="padding:6px 12px 6px 0">${esc(r.product)}</td>` +
+    `<td style="padding:6px 12px 6px 0">${esc(r.horse)} · ${esc(r.rider_name)}<br>` +
+    `<span style="color:#777">${esc(r.event_name)}</span></td>` +
+    `<td style="padding:6px 0;text-align:right">${sym}${r.price}</td></tr>`).join("");
+  const html = `
+  <div style="font-family:-apple-system,Segoe UI,sans-serif;max-width:560px;margin:0 auto;color:#1a1a1a">
+    <div style="border-top:4px solid #C11836;padding:24px 0 8px"><strong style="font-size:20px">EQUIREEL</strong></div>
+    <h2 style="font-weight:600">Thanks${name ? ", " + esc(name.split(" ")[0]) : ""} — your order is in.</h2>
+    <p>Our editors are on it. Your video${items.length > 1 ? "s" : ""} will be delivered to this email address
+    within <strong>5 days</strong> (usually much sooner).</p>
+    <table style="border-collapse:collapse;width:100%;font-size:14px">${lines}</table>
+    <p style="font-size:15px"><strong>Total: ${sym}${total}</strong></p>
+    ${receiptUrl ? `<p><a href="${esc(receiptUrl)}" style="color:#C11836">View your card receipt</a></p>` : ""}
+    <p style="color:#777;font-size:13px">Add orders@equireel.com to your contacts so the delivery email
+    doesn't land in spam. Reply to this email with any question — a human reads it.</p>
+  </div>`;
+  await send(email, `Your Equireel order — ${rows.length} video${rows.length > 1 ? "s" : ""}`, html);
+}
+
+async function sendFulfilmentOrder({ session, items, order, rows, email, currency, md }) {
+  const to = process.env.FULFILMENT_EMAIL;
+  if (!to) { console.log("[fulfilment email skipped — no FULFILMENT_EMAIL]"); return; }
+  const sym = CUR[currency] || "£";
+  const lines = rows.map((r, i) => {
+    const pr = items[i] && items[i].pr;
+    return `<li style="margin-bottom:10px"><code>${esc(r.horse_info)}</code><br>` +
+      `${esc(r.product)} — ${sym}${r.price}` +
+      (r.xc_day || r.xc_time ? ` — ${esc(r.xc_day || "")} ${esc(r.xc_time || "")}` : "") +
+      `<br><em>${esc(PREF_LABEL(pr))}</em></li>`;
+  }).join("");
+  const html = `
+  <div style="font-family:monospace;font-size:14px">
+    <p><strong>NEW WEBSITE ORDER #${order ? order.id : "?"}</strong> — ${sym}${Math.round((session.amount_total || 0) / 100)} ${currency}</p>
+    <p>Customer: ${esc(email)}</p>
+    <ol>${lines}</ol>
+    ${md.dvd ? `<p><strong>DVD requested.</strong> Post to: ${esc(md.addr || "(no address!)")}</p>` : ""}
+    <p>Stripe session: ${esc(session.id)}</p>
+  </div>`;
+  await send(to, `Order #${order ? order.id : "?"}: ${rows.length} video${rows.length > 1 ? "s" : ""} (${sym}${Math.round((session.amount_total || 0) / 100)})`, html);
+}
+
+module.exports = { sendCustomerConfirmation, sendFulfilmentOrder };
