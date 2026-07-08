@@ -21,6 +21,15 @@ function RiderInner() {
   const [, dataTick] = useState(0);
   const [checkout, setCheckout] = useState(null);
 
+  /* arrived from a horse page? the horse name travels in the URL — resolve it
+     to that round so we can offer a link straight back to its horse page */
+  const fromHorse = ctx.combo.trim().toLowerCase();
+  const backRound = fromHorse
+    ? (rounds.find((r) => r.en.horse.toLowerCase() === fromHorse && r.ev.country === ctx.country)
+       || rounds.find((r) => r.en.horse.toLowerCase() === fromHorse))
+    : null;
+  const backEntry = backRound ? backRound.en : null;
+
   useEffect(() => onDataLoaded(() => dataTick((n) => n + 1)), []);
 
   useEffect(() => {
@@ -45,8 +54,26 @@ function RiderInner() {
     <>
       <Header />
 
-      <div className="container page-head">
+      {/* frozen top row (mobile) — the rider's name stays put while scrolling,
+          with a link back to the horse page when they came from one */}
+      <div className="rider-bar">
+        <div className="container rider-bar-in">
+          {backEntry && (
+            <a className="rider-back" href={href("/horse?id=" + backEntry.id)} aria-label={"Back to " + backEntry.horse}
+              dangerouslySetInnerHTML={{ __html: icons.chevL }} />
+          )}
+          <span className="rider-bar-name">{tidyName(name)}</span>
+        </div>
+      </div>
+
+      <div className="container page-head rider-head">
         <Crumbs trail={[{ label: tidyName(name) }]} />
+        {backEntry && (
+          <a className="rider-back-link" href={href("/horse?id=" + backEntry.id)}>
+            <span dangerouslySetInnerHTML={{ __html: icons.chevL }} style={{ display: "contents" }} />
+            Back to {backEntry.horse}
+          </a>
+        )}
         <h1>{tidyName(name)}</h1>
         <p className="sub">{rounds.length} round{rounds.length === 1 ? "" : "s"} on record across {groups.length} event{groups.length === 1 ? "" : "s"}</p>
         {rounds.length > 1 && (
@@ -59,13 +86,16 @@ function RiderInner() {
         )}
       </div>
 
-      <div className="container" style={{ paddingBottom: "56px" }}>
+      <div className="container rider-rounds" style={{ paddingBottom: "56px" }}>
         {groups.map((g) => (
           <div key={g.ev.id} className="result-group">
             <a className="result-ev-head" href={href("/event?id=" + g.ev.id)}>
               <img src={"https://flagcdn.com/w40/" + g.ev.country + ".png"} alt="" width="22" />
-              <strong>{g.ev.name}</strong> · {fmtDate(g.ev.date, "parts").m} {eventYear(g.ev)}
-              <span className="rg-country"> · {getCountry(g.ev.country).name}</span>
+              <span className="reh-body">
+                <strong className="reh-name">{g.ev.name}</strong>
+                <span className="reh-date">{fmtDate(g.ev.date, "parts").m} {eventYear(g.ev)}</span>
+              </span>
+              <span className="rg-country">{getCountry(g.ev.country).name}</span>
             </a>
             <div className="horse-list">
               {g.items.map((en) => <HorseCard key={en.id} en={en} ev={g.ev} />)}

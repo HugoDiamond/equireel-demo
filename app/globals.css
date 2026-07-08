@@ -751,7 +751,20 @@ select { cursor: pointer; appearance: none; background-image: url("data:image/sv
 .result-ev-head strong { color: var(--eq-ink); font-weight: 700; }
 .result-ev-head:hover strong { color: var(--eq-red); }
 .result-ev-head img { width: 24px; height: 17px; object-fit: cover; border-radius: 3px; box-shadow: 0 1px 3px rgba(0,0,0,0.18); flex-shrink: 0; }
+.reh-body { display: contents; }
+.reh-date::before, .result-ev-head .rg-country::before { content: "·"; margin-right: 8px; }
 .result-ev-head .rg-country { color: var(--eq-red); font-weight: 600; }
+
+/* rider page: back-to-horse link (in the header on desktop) + a frozen name
+   bar that only appears on mobile */
+.rider-bar { display: none; }
+.rider-back-link {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 13px; font-weight: 600; color: var(--eq-red);
+  margin: 8px 0 2px; width: fit-content;
+}
+.rider-back-link svg { width: 15px; height: 15px; stroke: var(--eq-red); }
+.rider-back-link:hover { color: var(--eq-red-dark); }
 
 /* ============ Event page header extras ============ */
 .price-line { font-size: 14px; color: var(--eq-body); margin-top: 6px; }
@@ -1190,6 +1203,30 @@ select { cursor: pointer; appearance: none; background-image: url("data:image/sv
   .event-cta .badge { display: none; }
   /* slim event cards on mobile — drop venue & combinations, keep the body */
   .event-info .meta .m-venue, .event-info .meta .m-combos { display: none; }
+
+  /* ---- rider page (mobile) ---- */
+  /* the rider's name becomes a frozen bar under the header; the in-page
+     title and breadcrumb drop out so the name isn't shown three times */
+  .rider-bar {
+    display: block;
+    position: sticky; top: 67px; z-index: 40;
+    background: var(--eq-black); color: #fff;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .rider-bar-in { display: flex; align-items: center; gap: 6px; height: 46px; }
+  .rider-back { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; margin-left: -6px; flex-shrink: 0; }
+  .rider-back svg { width: 22px; height: 22px; stroke: #fff; }
+  .rider-bar-name { font-weight: 700; font-size: 16px; letter-spacing: -0.2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rider-head h1, .rider-head .crumbs, .rider-head .rider-back-link { display: none; }
+  /* event group header: drop the country, stack name over date in red */
+  .rider-rounds .result-ev-head { gap: 10px; margin-bottom: 10px; }
+  .rider-rounds .reh-body { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+  .rider-rounds .reh-name { font-size: 15px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rider-rounds .reh-date { font-size: 12px; color: var(--eq-red); font-weight: 600; }
+  .rider-rounds .reh-date::before { content: none; }
+  .rider-rounds .rg-country { display: none; }
+  /* show the full horse name on rider-page placards — let it wrap */
+  .rider-rounds .horse-info h3 { white-space: normal; overflow: visible; }
 }
 
 /* ============ Horse page (the shop) ============ */
