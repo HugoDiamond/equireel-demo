@@ -9,7 +9,7 @@ import { Header, Footer, Crumbs } from "../../components/Chrome";
 import HorseCard from "../../components/HorseCard";
 import {
   href, icons, COUNTRIES, EVENTS, getCountry, getEntries, eventsForCountry,
-  eventsForCountryYear, yearsForCountry, currentEvents, eventYear,
+  eventsForCountryYear, yearsForCountry, liveEventsForCountry, eventYear,
   fmtDate, fmtRange, closestMatches, onDataLoaded
 } from "../../lib/eq";
 
@@ -135,11 +135,12 @@ function EventsInner() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [country.code, year, month, q]);
 
-  /* recent = same definition as the homepage quick links, scoped to this country;
-     falls back to the newest fixtures when nothing is inside the window */
-  let recent = currentEvents(21).filter((e) => e.country === country.code).slice(0, 6);
-  const isCurrent = recent.length > 0; /* the live dot only when genuinely recent */
-  if (!isCurrent) recent = eventsForCountry(country.code).slice(0, 2);
+  /* "Latest events" = only genuinely live fixtures — today (anchored to the
+     newest event in the catalogue) within a day either side of the event.
+     No fallback: on a quiet week the strip disappears and the archive below,
+     which already leads newest-first, is the single source of truth. */
+  const recent = liveEventsForCountry(country.code, 1).slice(0, 6);
+  const isCurrent = recent.length > 0;
   const thisYear = new Date().getFullYear();
 
   const searching = q.trim().length > 0;
@@ -177,26 +178,27 @@ function EventsInner() {
 
       <div className="container" style={{ paddingBottom: "56px" }}>
 
-        <p className="eyebrow" style={{ marginTop: "8px" }}>
-          {isCurrent && <span className="live-dot" aria-hidden="true"></span>}Latest events
-        </p>
-        <div className="live-grid" style={{ marginBottom: "30px" }}>
-          {recent.map((e) => (
-            <a key={e.id} className="live-card" href={href("/event?id=" + e.id)}>
-              {e.country !== country.code && (
-                <img className="flagimg" src={"https://flagcdn.com/w80/" + e.country + ".png"} alt="" />
-              )}
-              <div className="live-info">
-                <h3>{e.name}</h3>
-                <p>
-                  <span className="d">{fmtRange(e.date, e.dateEnd)}{eventYear(e) !== thisYear ? " " + eventYear(e) : ""}</span>
-                  {" · "}{e.body}
-                </p>
-              </div>
-              <span className="go" dangerouslySetInnerHTML={{ __html: icons.chevR }} />
-            </a>
-          ))}
-        </div>
+        {isCurrent && (
+          <>
+            <p className="eyebrow" style={{ marginTop: "8px" }}>
+              <span className="live-dot" aria-hidden="true"></span>Latest events
+            </p>
+            <div className="live-grid" style={{ marginBottom: "30px" }}>
+              {recent.map((e) => (
+                <a key={e.id} className="live-card" href={href("/event?id=" + e.id)}>
+                  <div className="live-info">
+                    <h3>{e.name}</h3>
+                    <p>
+                      <span className="d">{fmtRange(e.date, e.dateEnd)}{eventYear(e) !== thisYear ? " " + eventYear(e) : ""}</span>
+                      {" · "}{e.body}
+                    </p>
+                  </div>
+                  <span className="go" dangerouslySetInnerHTML={{ __html: icons.chevR }} />
+                </a>
+              ))}
+            </div>
+          </>
+        )}
 
         <p className="eyebrow">All events</p>
         <div className="toolbar-sticky">
