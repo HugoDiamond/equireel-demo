@@ -1165,6 +1165,8 @@ select { cursor: pointer; appearance: none; background-image: url("data:image/sv
   .horse-info .people span.xc-when { display: none; } /* day & time drop off the mobile placard */
   .horse-card .btn { display: none; } /* thumbnail is the tap target on mobile */
   .event-cta .badge { display: none; }
+  /* slim event cards on mobile — drop venue & combinations, keep the body */
+  .event-info .meta .m-venue, .event-info .meta .m-combos { display: none; }
 }
 
 /* ============ Horse page (the shop) ============ */

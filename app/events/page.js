@@ -1,7 +1,8 @@
 "use client";
 
-/* Country page — recent events prominent, year selector for the archive
-   (footage back to 2019), cross-year search. */
+/* Country page — the full event archive with a year selector (footage back
+   to 2019) and cross-year search. "Latest events" now lives only on the
+   homepage; the archive already leads newest-first. */
 
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
@@ -9,8 +10,8 @@ import { Header, Footer, Crumbs } from "../../components/Chrome";
 import HorseCard from "../../components/HorseCard";
 import {
   href, icons, COUNTRIES, EVENTS, getCountry, getEntries, eventsForCountry,
-  eventsForCountryYear, yearsForCountry, liveEventsForCountry, eventYear,
-  fmtDate, fmtRange, closestMatches, onDataLoaded
+  eventsForCountryYear, yearsForCountry, eventYear,
+  fmtDate, closestMatches, onDataLoaded
 } from "../../lib/eq";
 
 /* a two-day event can straddle a month boundary — it belongs to both */
@@ -81,9 +82,9 @@ function EventCard({ e, showYear, showFlag }) {
           {e.name}{showYear ? " · " + eventYear(e) : ""}
         </h3>
         <div className="meta">
-          <span><span dangerouslySetInnerHTML={{ __html: icons.pin }} style={{ display: "contents" }} />{e.venue}</span>
+          <span className="m-venue"><span dangerouslySetInnerHTML={{ __html: icons.pin }} style={{ display: "contents" }} />{e.venue}</span>
           <span><span dangerouslySetInnerHTML={{ __html: icons.rosette }} style={{ display: "contents" }} />{e.body}</span>
-          <span><span dangerouslySetInnerHTML={{ __html: icons.user }} style={{ display: "contents" }} />{entries.length} combinations</span>
+          <span className="m-combos"><span dangerouslySetInnerHTML={{ __html: icons.user }} style={{ display: "contents" }} />{entries.length} combinations</span>
         </div>
       </div>
       <div className="event-cta">
@@ -135,14 +136,6 @@ function EventsInner() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [country.code, year, month, q]);
 
-  /* "Latest events" = only genuinely live fixtures — today (anchored to the
-     newest event in the catalogue) within a day either side of the event.
-     No fallback: on a quiet week the strip disappears and the archive below,
-     which already leads newest-first, is the single source of truth. */
-  const recent = liveEventsForCountry(country.code, 1).slice(0, 6);
-  const isCurrent = recent.length > 0;
-  const thisYear = new Date().getFullYear();
-
   const searching = q.trim().length > 0;
   const yearEvents = eventsForCountryYear(country.code, year);
   /* months that actually have events in the selected year, calendar order;
@@ -178,29 +171,7 @@ function EventsInner() {
 
       <div className="container" style={{ paddingBottom: "56px" }}>
 
-        {isCurrent && (
-          <>
-            <p className="eyebrow" style={{ marginTop: "8px" }}>
-              <span className="live-dot" aria-hidden="true"></span>Latest events
-            </p>
-            <div className="live-grid" style={{ marginBottom: "30px" }}>
-              {recent.map((e) => (
-                <a key={e.id} className="live-card" href={href("/event?id=" + e.id)}>
-                  <div className="live-info">
-                    <h3>{e.name}</h3>
-                    <p>
-                      <span className="d">{fmtRange(e.date, e.dateEnd)}{eventYear(e) !== thisYear ? " " + eventYear(e) : ""}</span>
-                      {" · "}{e.body}
-                    </p>
-                  </div>
-                  <span className="go" dangerouslySetInnerHTML={{ __html: icons.chevR }} />
-                </a>
-              ))}
-            </div>
-          </>
-        )}
-
-        <p className="eyebrow">All events</p>
+        <p className="eyebrow" style={{ marginTop: "8px" }}>All events</p>
         <div className="toolbar-sticky">
           <div className="toolbar" style={{ margin: 0 }}>
             <div className="year-pills" aria-label="Choose a year">

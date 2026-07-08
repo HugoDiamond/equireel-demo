@@ -5,7 +5,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Header, Footer } from "../components/Chrome";
 import {
-  asset, href, icons, COUNTRIES, currentEvents, getCountry, getEvent,
+  asset, href, icons, COUNTRIES, latestEvents, getCountry, getEvent,
   fmtRange, purchases, searchResultsHTML
 } from "../lib/eq";
 import * as player from "../lib/player";
@@ -136,7 +136,7 @@ export default function Home() {
     return () => document.removeEventListener("click", onDoc);
   }, []);
 
-  const evs = currentEvents(14);
+  const evs = latestEvents(6);
   const liveList = (country
     ? evs.filter((e) => e.country === country).concat(evs.filter((e) => e.country !== country))
     : evs
