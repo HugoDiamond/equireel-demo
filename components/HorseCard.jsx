@@ -9,7 +9,7 @@
 import { useState } from "react";
 import { icons, purchases, href, eventYear, fmtDate, basket, tidyName } from "../lib/eq";
 
-export default function HorseCard({ en, ev, mounted = true, showEvent = false }) {
+export default function HorseCard({ en, ev, mounted = true, showEvent = false, riderLink = true }) {
   const [, tick] = useState(0);
   const inBasket = mounted && basket.has(en.id);
   function quickAdd(e) {
@@ -68,13 +68,15 @@ export default function HorseCard({ en, ev, mounted = true, showEvent = false })
           <h3><a className="horse-link" href={horseUrl}>{en.horse}</a></h3>
           <div className="people">
             <span><span dangerouslySetInnerHTML={{ __html: icons.user }} style={{ display: "contents" }} />
-              <a className="rider-link" href={href("/rider?name=" + encodeURIComponent(tidyName(en.rider)) + "&h=" + encodeURIComponent(en.horse) + "&c=" + ev.country)}>{tidyName(en.rider)}</a>
+              {riderLink
+                ? <a className="rider-link" href={href("/rider?name=" + encodeURIComponent(tidyName(en.rider)) + "&h=" + encodeURIComponent(en.horse) + "&c=" + ev.country)}>{tidyName(en.rider)}</a>
+                : <span className="rider-name">{tidyName(en.rider)}</span>}
             </span>
             {en.owner && (
               <span><span dangerouslySetInnerHTML={{ __html: icons.rosette }} style={{ display: "contents" }} />{en.owner}</span>
             )}
             {!en.owner && en.xcTime && (
-              <span><span dangerouslySetInnerHTML={{ __html: icons.cal }} style={{ display: "contents" }} />XC {en.xcDay ? en.xcDay + " " : ""}{en.xcTime}</span>
+              <span className="xc-when"><span dangerouslySetInnerHTML={{ __html: icons.cal }} style={{ display: "contents" }} />XC {en.xcDay ? en.xcDay + " " : ""}{en.xcTime}</span>
             )}
           </div>
         </div>

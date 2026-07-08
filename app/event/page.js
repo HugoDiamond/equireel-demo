@@ -10,7 +10,7 @@ import { Header, Footer, Crumbs } from "../../components/Chrome";
 import HorseCard from "../../components/HorseCard";
 import {
   href, EVENTS, getCountry, getEvent, getEntries, fmtRange,
-  money, siblingEditions, eventYear, onDataLoaded, sectionsOf, productPrices
+  siblingEditions, eventYear, onDataLoaded, sectionsOf
 } from "../../lib/eq";
 
 function EventInner() {
@@ -64,11 +64,6 @@ function EventInner() {
             <p className="sub">
               {fmtRange(ev.date, ev.dateEnd, "long")} · {ev.venue} · {ev.body} · <span>{rows.length}</span> combinations
             </p>
-            <p className="price-line">
-              Cross Country Video from <strong>{money(ev.price, ev.country)}</strong>
-              {" "}· Social Reel add-on {money(productPrices(ev).reelAdd, ev.country)}
-              {" "}· Show Jumping add-on {money(ev.priceSJ - ev.price, ev.country)}
-            </p>
           </div>
         </div>
         {editions.length > 0 && (
@@ -105,7 +100,7 @@ function EventInner() {
             return (
               <div key={en.id} style={{ display: "contents" }}>
                 {showHead && <div className="list-sec-head">{en.section}</div>}
-                <HorseCard en={en} ev={ev} mounted={mounted} />
+                <HorseCard en={en} ev={ev} mounted={mounted} riderLink={false} />
               </div>
             );
           })}
