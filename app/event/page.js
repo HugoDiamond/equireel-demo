@@ -9,7 +9,7 @@ import { useSearchParams } from "next/navigation";
 import { Header, Footer, Crumbs } from "../../components/Chrome";
 import HorseCard from "../../components/HorseCard";
 import {
-  href, EVENTS, getCountry, getEvent, getEntries, fmtRange,
+  href, icons, EVENTS, getCountry, getEvent, getEntries, fmtRange,
   siblingEditions, eventYear, onDataLoaded, sectionsOf
 } from "../../lib/eq";
 
@@ -40,8 +40,7 @@ function EventInner() {
   const rows = entries.filter((en) =>
     (!sec || en.section === sec) &&
     (!f || String(en.bib) === f || en.horse.toLowerCase().includes(f) ||
-      en.rider.toLowerCase().includes(f) || en.owner.toLowerCase().includes(f) ||
-      en.section.toLowerCase().includes(f))
+      en.rider.toLowerCase().includes(f) || en.section.toLowerCase().includes(f))
   );
 
   const grouped = !sec && !f;
@@ -61,9 +60,24 @@ function EventInner() {
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "14px", flexWrap: "wrap" }}>
           <div>
             <h1>{ev.name}</h1>
-            <p className="sub">
-              {fmtRange(ev.date, ev.dateEnd, "long")} · {ev.venue} · {ev.body} · <span>{rows.length}</span> combinations
-            </p>
+            <div className="event-meta">
+              <span className="em-chip em-date">
+                <span dangerouslySetInnerHTML={{ __html: icons.cal }} style={{ display: "contents" }} />
+                {fmtRange(ev.date, ev.dateEnd, "long")}
+              </span>
+              <span className="em-chip em-org">
+                <span dangerouslySetInnerHTML={{ __html: icons.rosette }} style={{ display: "contents" }} />
+                {ev.body}
+              </span>
+              <span className="em-chip em-venue">
+                <span dangerouslySetInnerHTML={{ __html: icons.pin }} style={{ display: "contents" }} />
+                {ev.venue}
+              </span>
+              <span className="em-chip em-combos">
+                <span dangerouslySetInnerHTML={{ __html: icons.user }} style={{ display: "contents" }} />
+                <span>{rows.length}</span> combinations
+              </span>
+            </div>
           </div>
         </div>
         {editions.length > 0 && (
@@ -83,7 +97,7 @@ function EventInner() {
         <div className="toolbar toolbar-sticky">
           <div className="searchwrap">
             <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" /></svg>
-            <input type="text" placeholder="Search horse, rider, owner or bib number..." value={q} onChange={(e) => setQ(e.target.value)} />
+            <input type="text" placeholder="Search horse, rider or bib number..." value={q} onChange={(e) => setQ(e.target.value)} />
           </div>
           {sectionsOf(ev).length > 0 && (
             <select aria-label="Filter by section" value={sec} onChange={(e) => setSec(e.target.value)}>

@@ -458,16 +458,18 @@ a.crumb:hover { color: var(--eq-red); background: rgba(193, 24, 54, 0.06); borde
 .page-head h1:has(.flagimg) { display: flex; align-items: center; gap: 12px; }
 .page-head .flagimg { width: 40px; height: 29px; object-fit: cover; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.22); flex-shrink: 0; }
 .country-card h3 { font-size: 18px; font-weight: 700; letter-spacing: -0.2px; flex: 1; }
-.country-card .go {
-  width: 32px; height: 32px; border-radius: 50%;
+/* canonical click-through arrow — one shape everywhere: a cream disc with a
+   red chevron that flips to a red disc + white chevron on card hover */
+.go {
+  width: 30px; height: 30px; border-radius: 50%;
   background: var(--eq-cream);
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
   transition: background 0.15s ease;
 }
-.country-card .go svg { width: 16px; height: 16px; stroke: var(--eq-red); }
-.country-card:hover .go { background: var(--eq-red); }
-.country-card:hover .go svg { stroke: #fff; }
+.go svg { width: 15px; height: 15px; stroke: var(--eq-red); }
+.country-card:hover .go, .live-card:hover .go, .event-card:hover .go { background: var(--eq-red); }
+.country-card:hover .go svg, .live-card:hover .go svg, .event-card:hover .go svg { stroke: #fff; }
 
 /* one vertical rhythm for every white section: 32px top + 32px bottom = 64px between sections */
 .section-block { padding: 32px 20px; }
@@ -605,15 +607,6 @@ a.crumb:hover { color: var(--eq-red); background: rgba(193, 24, 54, 0.06); borde
 .live-info { flex: 1; min-width: 0; }
 .live-info h3 { font-size: 16.5px; font-weight: 700; letter-spacing: -0.2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .live-info p { font-size: 13px; color: var(--eq-muted); margin: 2px 0 0; }
-.live-card .go {
-  width: 30px; height: 30px; border-radius: 50%;
-  background: var(--eq-cream);
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-}
-.live-card .go svg { width: 15px; height: 15px; stroke: var(--eq-red); }
-.live-card:hover .go { background: var(--eq-red); }
-.live-card:hover .go svg { stroke: #fff; }
 @media (max-width: 640px) {
   .live-card .badge { display: none; }
 }
@@ -766,6 +759,24 @@ select { cursor: pointer; appearance: none; background-image: url("data:image/sv
 .editions { font-size: 13px; color: var(--eq-muted); margin-top: 10px; }
 .editions a { font-weight: 600; }
 
+/* event meta as a row of chips — date leads in solid red, organisation in a
+   red tint, venue and combinations in neutral discs */
+.event-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; }
+.em-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 13px; font-weight: 600; line-height: 1;
+  padding: 7px 12px; border-radius: 999px;
+  background: var(--eq-cream); color: var(--eq-charcoal);
+}
+.em-chip svg { width: 13px; height: 13px; stroke: var(--eq-muted); flex-shrink: 0; }
+.em-chip.em-date { background: var(--eq-red); color: #fff; }
+.em-chip.em-date svg { stroke: #fff; }
+.em-chip.em-org { background: rgba(193, 24, 54, 0.08); color: var(--eq-red); }
+.em-chip.em-org svg { stroke: var(--eq-red); }
+
+/* event page toolbar sits close under the header — trim the space above it */
+.toolbar.toolbar-sticky { margin: 2px 0 14px; padding: 6px 0 10px; }
+
 /* ============ Section group headings in entry lists ============ */
 .list-sec-head {
   font-size: 12px;
@@ -775,7 +786,18 @@ select { cursor: pointer; appearance: none; background-image: url("data:image/sv
   color: var(--eq-muted);
   margin: 20px 0 2px;
 }
-.horse-list > div:first-child .list-sec-head { margin-top: 2px; }
+/* on the event page the section heading sticks below the toolbar as you scroll,
+   so the current section is always in view — which lets the placard drop its
+   own section label on mobile */
+.horse-list .list-sec-head {
+  position: sticky;
+  top: 124px;
+  z-index: 20;
+  margin: 0;
+  padding: 12px 0 8px;
+  background: var(--eq-paper);
+}
+.horse-list > div:first-child .list-sec-head { padding-top: 4px; }
 
 /* ============ Event list ============ */
 .event-list { display: flex; flex-direction: column; gap: 12px; }
@@ -792,8 +814,6 @@ select { cursor: pointer; appearance: none; background-image: url("data:image/sv
   transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
 }
 .event-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lift); border-color: var(--eq-red); }
-.event-card:hover .event-cta .chev { background: var(--eq-red); }
-.event-card:hover .event-cta .chev svg { stroke: #fff; }
 .event-date {
   flex-shrink: 0;
   width: 64px;
@@ -816,8 +836,6 @@ select { cursor: pointer; appearance: none; background-image: url("data:image/sv
 .badge { font-size: 12px; font-weight: 600; padding: 4px 11px; border-radius: 999px; white-space: nowrap; }
 .badge.ready { background: var(--eq-green-bg); color: var(--eq-green); }
 .badge.processing { background: var(--eq-amber-bg); color: var(--eq-amber); }
-
-.chev { width: 18px; height: 18px; stroke: var(--eq-muted); }
 
 /* ============ Horse placards ============ */
 .horse-list { display: flex; flex-direction: column; gap: 12px; }
@@ -1138,9 +1156,14 @@ select { cursor: pointer; appearance: none; background-image: url("data:image/sv
   .month-pills::-webkit-scrollbar { display: none; }
   .month-pill { flex-shrink: 0; }
   .toolbar select { width: 100%; }
-  /* compact the date · venue · body · combinations line */
+  /* compact the country-page sub line */
   .page-head .sub { font-size: 13px; line-height: 1.45; margin-top: 5px; }
-  .thumb { width: 116px; height: 78px; }
+  /* event page: keep only the date and organisation chips */
+  .event-meta { gap: 7px; margin-top: 10px; }
+  .em-chip.em-venue, .em-chip.em-combos { display: none; }
+  /* section heading sticks under the mobile toolbar (header 67 + toolbar ~114) */
+  .horse-list .list-sec-head { top: 180px; padding: 9px 0 6px; }
+  .thumb { width: 104px; height: 66px; }
   .thumb .freetag { font-size: 9px; padding: 2px 6px; letter-spacing: 0.2px; }
   .vm-stage { aspect-ratio: auto; min-height: 420px; max-height: 72vh; }
   .vm-stage video { position: absolute; inset: 0; height: 100%; }
@@ -1156,11 +1179,11 @@ select { cursor: pointer; appearance: none; background-image: url("data:image/sv
   .partner-row img.tall { height: 32px; }
   .partner-label { width: 100%; text-align: center; }
   /* ---- placard: cleaner, tighter layout on mobile ---- */
-  .horse-card { gap: 12px; padding: 10px; align-items: center; }
-  .horse-info .topline { gap: 7px; margin-bottom: 2px; }
+  .horse-card { gap: 11px; padding: 9px; align-items: center; }
+  .horse-info .topline { gap: 7px; margin-bottom: 1px; }
   .bib { font-size: 12px; min-width: 24px; height: 21px; padding: 0 6px; }
-  .sec-label { font-size: 11px; letter-spacing: 0.5px; }
-  .horse-info h3 { font-size: 16px; margin-bottom: 2px; }
+  .sec-label { display: none; } /* section comes from the sticky header now */
+  .horse-info h3 { font-size: 16px; margin-bottom: 1px; }
   .horse-info .people { flex-direction: column; gap: 2px; font-size: 12.5px; }
   .horse-info .people span.xc-when { display: none; } /* day & time drop off the mobile placard */
   .horse-card .btn { display: none; } /* thumbnail is the tap target on mobile */

@@ -57,7 +57,7 @@ export default function Home() {
   const [country, setCountry] = useState(null);
   const [lastEvent, setLastEvent] = useState(null);
   const [hsHtml, setHsHtml] = useState("");
-  const [placeholder, setPlaceholder] = useState("Search horse, rider, owner or event...");
+  const [placeholder, setPlaceholder] = useState("Search horse, rider or event...");
   const hsRef = useRef(null);
   const heroSearchRef = useRef(null);
   const heroImgRef = useRef(null);
@@ -175,7 +175,7 @@ export default function Home() {
           <div className="hero-search" ref={heroSearchRef}>
             <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" /></svg>
             <input id="hq" type="text" placeholder={placeholder} autoComplete="off"
-              aria-label="Search horse, rider, owner or event" onInput={hsInput} onKeyDown={hsKey} />
+              aria-label="Search horse, rider or event" onInput={hsInput} onKeyDown={hsKey} />
             <div ref={hsRef} className="hs-results" style={{ display: hsHtml ? "block" : "none" }}
               dangerouslySetInnerHTML={{ __html: hsHtml }} />
           </div>

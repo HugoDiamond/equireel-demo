@@ -21,7 +21,7 @@ function monthsOf(e) {
   return m1 === m2 ? [m1] : [m1, m2];
 }
 
-/* full search — horses, riders, owners and events — across EVERY country and
+/* full search — horses, riders and events — across EVERY country and
    year, ranked so the current country's matches lead. A lost visitor on the
    wrong country page still finds their horse, and the foreign flag corrects
    them at a glance. */
@@ -88,7 +88,7 @@ function EventCard({ e, showYear, showFlag }) {
         </div>
       </div>
       <div className="event-cta">
-        <span className="chev" dangerouslySetInnerHTML={{ __html: icons.chevR }} />
+        <span className="go" dangerouslySetInnerHTML={{ __html: icons.chevR }} />
       </div>
     </a>
   );
@@ -185,8 +185,8 @@ function EventsInner() {
             </div>
             <div className="searchwrap">
               <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" /></svg>
-              <input type="text" aria-label="Search horse, rider, owner or event"
-                placeholder="Search horse, rider, owner or event..." value={q} onChange={(e) => setQ(e.target.value)} />
+              <input type="text" aria-label="Search horse, rider or event"
+                placeholder="Search horse, rider or event..." value={q} onChange={(e) => setQ(e.target.value)} />
             </div>
           </div>
           {!searching && monthsAvailable.length > 1 && (
@@ -244,7 +244,7 @@ function EventsInner() {
                 </div>
               </>
             )}
-            {resultCount === 0 && !suggesting && <p className="empty-note">No matches — try a horse, rider, owner or event name.</p>}
+            {resultCount === 0 && !suggesting && <p className="empty-note">No matches — try a horse, rider or event name.</p>}
           </>
         ) : (
           <>
