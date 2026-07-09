@@ -44,9 +44,26 @@ function HorseInner() {
   const [manual, setManual] = useState({ horse: "", rider: "", bib: "", start: "" });
   const [manualErr, setManualErr] = useState(false);
   const [checkout, setCheckout] = useState(null);
+  const [pubVideo, setPubVideo] = useState(null);
   const [, forceRender] = useState(0);
 
   useEffect(() => onDataLoaded(() => forceRender((n) => n + 1)), []);
+
+  /* a delivered customer video for this exact round, made public by its
+     owner — the site plays the real thing instead of a sample */
+  const CHECKOUT_API = process.env.NEXT_PUBLIC_CHECKOUT_API || "";
+  useEffect(() => {
+    setPubVideo(null);
+    if (!CHECKOUT_API || !en || !en.bib) return;
+    const ctrl = new AbortController();
+    fetch(CHECKOUT_API + "/public-videos?e=" + encodeURIComponent(ev.id) +
+          "&b=" + encodeURIComponent(String(en.bib)), { signal: ctrl.signal })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (d && d.videos && d.videos.length) setPubVideo(d.videos[0].url); })
+      .catch(() => {});
+    return () => ctrl.abort();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ev.id, en && en.id]);
 
   const horseName = en ? en.horse : manual.horse;
   const owned = mounted && en && purchases.has(en.id);
@@ -154,13 +171,13 @@ function HorseInner() {
           {/* ---- media ---- */}
           <div className="hp-media">
             {en ? (
-              <button className="hp-thumb" aria-label={owned ? "Watch full round" : en.generic || !ready ? "Watch a sample round" : "Watch free clip"}
-                onClick={() => player.open(en, ev)}>
+              <button className="hp-thumb" aria-label={pubVideo ? "Watch this round" : owned ? "Watch full round" : en.generic || !ready ? "Watch a sample round" : "Watch free clip"}
+                onClick={() => player.open(en, ev, pubVideo ? { publicUrl: pubVideo } : undefined)}>
                 <img src={en.thumb} alt=""
                   srcSet={en.thumb && en.thumb.endsWith(".webp") ? en.thumb.replace(".webp", "-sm.webp") + " 512w, " + en.thumb + " 1280w" : undefined}
                   sizes={en.thumb && en.thumb.endsWith(".webp") ? "(min-width: 900px) 640px, 100vw" : undefined} />
                 <span className="freetag">
-                  {owned ? "PURCHASED" : en.generic || !ready ? "SAMPLE ROUND" : "FREE CLIP · FENCE " + en.fence}
+                  {pubVideo && !owned ? "FULL ROUND · WATCH FREE" : owned ? "PURCHASED" : en.generic || !ready ? "SAMPLE ROUND" : "FREE CLIP · FENCE " + en.fence}
                 </span>
                 <span className="playbtn" dangerouslySetInnerHTML={{ __html: icons.play }} />
               </button>
@@ -174,7 +191,9 @@ function HorseInner() {
             )}
             {en && !owned && (
               <p className="hp-media-note">
-                {en.generic || !ready
+                {pubVideo
+                  ? "This round's official Equireel video is public — watch the real thing, start to finish."
+                  : en.generic || !ready
                   ? "Watch a full sample round from start to finish — your own is waiting to be ordered."
                   : "Watch your free clip of fence " + en.fence + " — no purchase needed."}
               </p>

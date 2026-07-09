@@ -77,4 +77,27 @@ async function sendFulfilmentOrder({ session, items, order, rows, email, currenc
   await send(to, `Order #${order ? order.id : "?"}: ${rows.length} video${rows.length > 1 ? "s" : ""} (${sym}${Math.round((session.amount_total || 0) / 100)})`, html);
 }
 
-module.exports = { sendCustomerConfirmation, sendFulfilmentOrder };
+async function sendVideoDelivery({ to, url, label, horse, product, event }) {
+  const html = `
+  <div style="font-family:-apple-system,Segoe UI,sans-serif;max-width:560px;margin:0 auto;color:#1a1a1a">
+    <div style="border-top:4px solid #C11836;padding:24px 0 8px"><strong style="font-size:20px">EQUIREEL</strong></div>
+    <h2 style="font-weight:600">Your video is ready 🎥</h2>
+    <p><strong>${esc(horse)}</strong> at ${esc(event)} — ${esc(product)}.</p>
+    <p style="margin:26px 0">
+      <a href="${esc(url)}" style="background:#C11836;color:#fff;text-decoration:none;
+        padding:13px 26px;border-radius:8px;font-weight:700;display:inline-block">Watch your video</a>
+    </p>
+    <p style="color:#777;font-size:13px">Direct link (save it — it's yours to keep):<br>
+      <a href="${esc(url)}" style="color:#C11836;word-break:break-all">${esc(url)}</a></p>
+    <p style="color:#777;font-size:13px">Edit requests are free — just reply to this email.</p>
+  </div>`;
+  await send(to, `Your video is ready — ${horse}`, html);
+}
+
+async function sendFulfilmentNote(subject, html) {
+  const to = process.env.FULFILMENT_EMAIL;
+  if (!to) return;
+  await send(to, subject, `<div style="font-family:monospace;font-size:14px">${html}</div>`);
+}
+
+module.exports = { sendCustomerConfirmation, sendFulfilmentOrder, sendVideoDelivery, sendFulfilmentNote };
