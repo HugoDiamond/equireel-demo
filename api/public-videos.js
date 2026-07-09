@@ -9,6 +9,7 @@ module.exports = async (req, res) => {
   if (req.method !== "GET") return res.status(405).json({ error: "GET only" });
   const e = (req.query && req.query.e || "").slice(0, 120);
   const b = (req.query && req.query.b || "").slice(0, 20);
+  const h = (req.query && req.query.h || "").slice(0, 120);
   if (!e) return res.status(400).json({ error: "e required" });
 
   try {
@@ -17,6 +18,8 @@ module.exports = async (req, res) => {
       .select("bib_number, horse, rider_name, product, video_link, order_id")
       .eq("event_name_orig", e).not("video_link", "is", null);
     if (b) q = q.eq("bib_number", b);
+    /* bibs repeat across sections at some events — horse name disambiguates */
+    if (h) q = q.ilike("horse", h);
     const { data: items, error } = await q.limit(50);
     if (error) return res.status(500).json({ error: "lookup failed" });
 

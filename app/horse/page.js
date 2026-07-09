@@ -57,9 +57,14 @@ function HorseInner() {
     if (!CHECKOUT_API || !en || !en.bib) return;
     const ctrl = new AbortController();
     fetch(CHECKOUT_API + "/public-videos?e=" + encodeURIComponent(ev.id) +
-          "&b=" + encodeURIComponent(String(en.bib)), { signal: ctrl.signal })
+          "&b=" + encodeURIComponent(String(en.bib)) +
+          "&h=" + encodeURIComponent(en.horse), { signal: ctrl.signal })
       .then((r) => (r.ok ? r.json() : null))
-      .then((d) => { if (d && d.videos && d.videos.length) setPubVideo(d.videos[0].url); })
+      .then((d) => {
+        const v = d && d.videos && d.videos.find(
+          (x) => (x.h || "").toLowerCase() === en.horse.toLowerCase());
+        if (v) setPubVideo(v.url);
+      })
       .catch(() => {});
     return () => ctrl.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
