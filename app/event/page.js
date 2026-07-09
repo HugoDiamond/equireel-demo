@@ -107,7 +107,7 @@ function EventInner() {
           )}
         </div>
 
-        <div className="horse-list">
+        <div className="horse-list event-placards">
           {rows.map((en) => {
             const showHead = grouped && en.section && en.section !== lastSection;
             lastSection = en.section;

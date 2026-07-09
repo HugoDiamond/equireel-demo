@@ -1174,8 +1174,9 @@ select { cursor: pointer; appearance: none; background-image: url("data:image/sv
   /* event page: keep only the date and organisation chips */
   .event-meta { gap: 7px; margin-top: 10px; }
   .em-chip.em-venue, .em-chip.em-combos { display: none; }
-  /* section heading sticks under the mobile toolbar (header 67 + toolbar ~114) */
-  .horse-list .list-sec-head { top: 180px; padding: 9px 0 6px; }
+  /* section heading sticks under the mobile toolbar (header 67 + toolbar ~114);
+     tuck it a few px up under the toolbar so no scrolling sliver shows between */
+  .horse-list .list-sec-head { top: 176px; padding: 13px 0 6px; }
   .thumb { width: 104px; height: 66px; }
   .thumb .freetag { font-size: 9px; padding: 2px 6px; letter-spacing: 0.2px; }
   .vm-stage { aspect-ratio: auto; min-height: 420px; max-height: 72vh; }
@@ -1197,6 +1198,8 @@ select { cursor: pointer; appearance: none; background-image: url("data:image/sv
   .bib { font-size: 12px; min-width: 24px; height: 21px; padding: 0 6px; }
   .sec-label { display: none; } /* section comes from the sticky header now */
   .horse-info h3 { font-size: 16px; margin-bottom: 1px; }
+  /* event-page placards: let the horse name wrap so it's shown in full */
+  .event-placards .horse-info h3 { white-space: normal; overflow: visible; }
   .horse-info .people { flex-direction: column; gap: 2px; font-size: 12.5px; }
   .horse-info .people span.xc-when { display: none; } /* day & time drop off the mobile placard */
   .horse-card .btn { display: none; } /* thumbnail is the tap target on mobile */
