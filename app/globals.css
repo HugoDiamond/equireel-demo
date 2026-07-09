@@ -427,6 +427,14 @@ a.crumb:hover { color: var(--eq-red); background: rgba(193, 24, 54, 0.06); borde
 .crumb-sep { width: 12px; height: 12px; color: #c6c6cd; flex: none; }
 .page-head h1 { font-size: clamp(24px, 4vw, 32px); font-weight: 700; letter-spacing: -0.3px; font-family: var(--font-body); }
 .page-head .sub { font-size: 15px; color: var(--eq-muted); margin-top: 4px; }
+/* legal pages (terms, privacy) — quiet readable prose */
+.legal { font-size: 15px; line-height: 1.65; }
+.legal h2 { font-size: 17px; font-weight: 700; margin: 26px 0 8px; }
+.legal p { margin: 0 0 12px; }
+.legal ul { margin: 0 0 12px; padding-left: 22px; }
+.legal li { margin-bottom: 7px; }
+.legal a { color: var(--eq-red); }
+.legal-updated { color: var(--eq-muted); font-size: 13px; margin-top: 30px; }
 
 /* ============ Cards & grids ============ */
 .country-grid {
