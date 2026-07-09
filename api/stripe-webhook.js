@@ -87,8 +87,11 @@ module.exports = async (req, res) => {
     const { data: dup } = await db.from("shop_orders").select("id").eq("stripe_charge_id", String(session.payment_intent)).limit(1);
     if (dup && dup.length) return res.status(200).json({ ok: true, duplicate: dup[0].id });
 
+    // test-mode payments are recorded but must never count as real revenue:
+    // status 'Processing' means PAID in reporting, so test events get 'Test'
+    const paidStatus = event.livemode ? "Processing" : "Test";
     const { data: order, error: oerr } = await db.from("shop_orders").insert({
-      status: "Processing", currency,
+      status: paidStatus, currency,
       charged: Math.round((session.amount_total || 0) / 100),
       share_consent: anyPublic, include_faults: faults ? "yes" : "no",
       stripe_charge_id: String(session.payment_intent), stripe_status: "succeeded",
