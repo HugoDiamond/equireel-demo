@@ -103,6 +103,18 @@ module.exports = async (req, res) => {
     }).select("id").single();
     if (oerr) { console.error("order insert failed:", oerr.message); return res.status(500).json({ error: "order write failed" }); }
 
+    // full per-video personalisation, persisted on the item so the editor
+    // queue can always show it (otherwise it lives only in Stripe metadata).
+    // Stored in the spare horse_info_orig column with a PREFS prefix.
+    const prefString = (pr) => {
+      const p = pr || {};
+      return "PREFS flag=" + (p.fl || "gb") +
+        " faults=" + (p.fa === false ? "exclude" : "in") +
+        " music=" + (p.mu === false ? "off" : "on") +
+        " sounds=" + (p.so === false ? "off" : "on") +
+        " public=" + (p.pu === false ? "no" : "yes");
+    };
+
     const rows = items.map((it) => {
       const ev = EVENTS[it.e] || { c: "gb", n: it.e, y: "", p: 0, sj: 0 };
       const price = itemLines(it, ev).reduce((s, l) => s + l[1], 0);
@@ -113,7 +125,8 @@ module.exports = async (req, res) => {
         product: PRODUCT_LABEL(it) + (md.dvd ? " & DVD" : ""),
         price, bib_number: String(it.b || ""), rider_name: it.r,
         xc_day: it.d || null, xc_time: it.t || null,
-        event_name_orig: it.e, created_at: new Date().toISOString(),
+        event_name_orig: it.e, horse_info_orig: prefString(it.pr),
+        created_at: new Date().toISOString(),
         shop_product_id: null
       };
     });

@@ -95,9 +95,24 @@ export default function OrdersQueue() {
             <div className="aq-item-sub">
               {it.product} — {(CUR[o.currency] || "")}{it.price}
               {it.day || it.time ? <> · {it.day} {it.time}</> : null}
-              {" · "}{o.public ? "public ok" : "PRIVATE"}
-              {" · "}faults {o.faults === "no" ? "EXCLUDED" : "in"}
               {it.delivered && it.url && <> · <a href={it.url} target="_blank" rel="noopener">watch</a></>}
+            </div>
+            <div className="aq-prefs">
+              {it.prefs ? (
+                <>
+                  <span className="aq-pref"><img src={"https://flagcdn.com/w20/" + it.prefs.flag + ".png"} alt="" width="16" /> {String(it.prefs.flag).toUpperCase()} flag</span>
+                  <span className={"aq-pref" + (it.prefs.faults === "exclude" ? " off" : "")}>faults {it.prefs.faults === "exclude" ? "EXCLUDED" : "in"}</span>
+                  <span className={"aq-pref" + (it.prefs.music === "off" ? " off" : "")}>music {it.prefs.music}</span>
+                  <span className={"aq-pref" + (it.prefs.sounds === "off" ? " off" : "")}>sounds {it.prefs.sounds}</span>
+                  <span className={"aq-pref" + (it.prefs.public === "no" ? " off" : "")}>{it.prefs.public === "no" ? "PRIVATE" : "public ok"}</span>
+                </>
+              ) : (
+                <>
+                  <span className={"aq-pref" + (o.faults === "no" ? " off" : "")}>faults {o.faults === "no" ? "EXCLUDED" : "in"}</span>
+                  <span className={"aq-pref" + (!o.public ? " off" : "")}>{o.public ? "public ok" : "PRIVATE"}</span>
+                  <span className="aq-pref">full prefs in the order email</span>
+                </>
+              )}
             </div>
           </div>
         </div>

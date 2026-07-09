@@ -28,7 +28,7 @@ module.exports = async (req, res) => {
     let items = [];
     if (ids.length) {
       const { data, error: ierr } = await db.from("shop_order_items")
-        .select("order_id, product, price, horse, horse_info, rider_name, bib_number, xc_day, xc_time, event_name, video_link")
+        .select("order_id, product, price, horse, horse_info, horse_info_orig, rider_name, bib_number, xc_day, xc_time, event_name, video_link")
         .in("order_id", ids);
       if (ierr) return res.status(500).json({ error: "items lookup failed" });
       items = data || [];
@@ -38,11 +38,23 @@ module.exports = async (req, res) => {
       id: o.id, status: o.status, currency: o.currency, charged: o.charged,
       email: o.stripe_receipt_email, public: !!o.share_consent,
       faults: o.include_faults, at: o.created_at,
-      items: items.filter((i) => i.order_id === o.id).map((i) => ({
-        product: i.product, price: i.price, horse: i.horse, label: i.horse_info,
-        rider: i.rider_name, bib: i.bib_number, day: i.xc_day, time: i.xc_time,
-        event: i.event_name, delivered: !!i.video_link, url: i.video_link
-      }))
+      items: items.filter((i) => i.order_id === o.id).map((i) => {
+        // per-item personalisation persisted by the webhook as
+        // "PREFS flag=gb faults=in music=on sounds=off public=yes"
+        let prefs = null;
+        if ((i.horse_info_orig || "").startsWith("PREFS ")) {
+          prefs = {};
+          for (const kv of i.horse_info_orig.slice(6).split(" ")) {
+            const [k, v] = kv.split("=");
+            if (k && v) prefs[k] = v;
+          }
+        }
+        return {
+          product: i.product, price: i.price, horse: i.horse, label: i.horse_info,
+          rider: i.rider_name, bib: i.bib_number, day: i.xc_day, time: i.xc_time,
+          event: i.event_name, delivered: !!i.video_link, url: i.video_link, prefs
+        };
+      })
     }));
     res.setHeader("Cache-Control", "no-store");
     return res.status(200).json({ orders: out });

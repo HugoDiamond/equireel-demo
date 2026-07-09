@@ -466,6 +466,10 @@ a.crumb:hover { color: var(--eq-red); background: rgba(193, 24, 54, 0.06); borde
 .aq-item-sub { font-size: 12.5px; color: var(--eq-muted); margin-top: 3px; }
 .aq-item-sub a { color: var(--eq-red); }
 .aq-note { font-size: 13px; color: var(--eq-muted); margin-top: 26px; line-height: 1.6; }
+.aq-prefs { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
+.aq-pref { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 600; background: #f2f6f2; color: #2c5c3a; border-radius: 20px; padding: 2px 9px; }
+.aq-pref.off { background: #fdeef1; color: var(--eq-red); }
+.aq-pref img { border-radius: 2px; }
 
 /* ============ Cards & grids ============ */
 .country-grid {
