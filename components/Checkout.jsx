@@ -240,8 +240,9 @@ export default function Checkout({ order, onClose, onComplete }) {
                   {itemLines(it).map(([label, amt]) => (
                     <div key={label} className="co2-line"><span>{label}</span><span>{money(amt, it.ev.country)}</span></div>
                   ))}
-                  {multi && it.product === "xc" && (
+                  {it.product === "xc" && (
                     <div className="co2-addons">
+                      {!multi && <span className="co2-addons-label">Add to your video</span>}
                       <button className={"co2-addon-chip" + (it.addSJ ? " on" : "")} onClick={() => toggleAddon(idx, "addSJ")}>
                         {it.addSJ ? "✓ " : "+ "}Show Jumping {money(productPrices(it.ev).sjAdd, it.ev.country)}
                       </button>

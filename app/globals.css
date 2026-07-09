@@ -1376,7 +1376,8 @@ select { cursor: pointer; appearance: none; background-image: url("data:image/sv
 .co2-item-ev { flex: 1; min-width: 0; font-size: 12px; font-weight: 600; color: var(--eq-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .co2-item-x { border: none; background: none; color: var(--eq-muted); font-size: 13px; cursor: pointer; padding: 2px 6px; border-radius: 6px; flex: none; }
 .co2-item-x:hover { color: var(--eq-red); background: rgba(193, 24, 54, 0.07); }
-.co2-addons { display: flex; gap: 6px; flex-wrap: wrap; padding: 4px 0 2px; }
+.co2-addons { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; padding: 4px 0 2px; }
+.co2-addons-label { flex-basis: 100%; font-size: 12px; font-weight: 600; color: var(--eq-muted); margin-bottom: 2px; }
 .co2-addon-chip {
   font-size: 12px; font-weight: 600; padding: 4px 11px; border-radius: 999px;
   border: 1px solid var(--eq-line); background: var(--eq-white); color: var(--eq-muted);
