@@ -60,8 +60,8 @@ function cors(req, res) {
   const origin = req.headers.origin || "";
   if (allowed.includes(origin) || allowed.includes("*")) {
     res.setHeader("Access-Control-Allow-Origin", origin || "*");
-    res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type, X-Admin-Key");
   }
   if (req.method === "OPTIONS") { res.status(204).end(); return true; }
   return false;
