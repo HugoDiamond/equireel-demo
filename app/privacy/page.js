@@ -30,7 +30,7 @@ export default function PrivacyPage() {
           <li><strong>On this site:</strong> your basket and preferences are kept in your own browser's storage. We set <strong>no advertising cookies and use no third-party trackers</strong>.</li>
           <li><strong>How the site is used:</strong> we keep our own first-party record of page views, searches and orders (an anonymous session code, never your identity) so we can make the shop better. This never leaves our systems and is never shared or sold.</li>
           <li><strong>"Email me when ready":</strong> if you leave your email for an event still being edited, we use it for that one notification.</li>
-          <li><strong>The chat assistant:</strong> questions you type are answered by an AI model (Anthropic's Claude) and kept in our own log so we can improve the answers. Don't type personal details into it — for anything about your order, email us instead.</li>
+          <li><strong>The chat assistant:</strong> answers are generated on your own device from our published FAQ and catalogue — your questions are not sent to any AI company. We keep our own log of questions asked so we can improve the answers.</li>
         </ul>
 
         <h2>2. Who processes it for us</h2>

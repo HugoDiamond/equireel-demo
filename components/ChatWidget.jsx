@@ -1,18 +1,20 @@
 "use client";
 
-/* Floating "Ask us anything" assistant — grounded on Equireel's real FAQ via
-   /api/ask. Hidden entirely on the static demo (no API). Deliberately small:
-   no external deps, sessionStorage history, graceful failure. */
+/* Floating Equireel assistant — instant, grounded, and free to run forever.
+   Answers come from lib/assistant.js (intent engine + live catalogue search),
+   entirely in the browser: no API, no per-question cost, works everywhere
+   including the static demo. Questions are logged for product insight when
+   analytics is available. */
 
 import { useEffect, useRef, useState } from "react";
-
-const API = process.env.NEXT_PUBLIC_CHECKOUT_API || "";
+import { answer, STARTERS } from "../lib/assistant";
+import { track } from "../lib/track";
+import { href, loadRealEntries } from "../lib/eq";
 
 export default function ChatWidget() {
   const [open, setOpen] = useState(false);
   const [msgs, setMsgs] = useState([]);
   const [input, setInput] = useState("");
-  const [busy, setBusy] = useState(false);
   const bodyRef = useRef(null);
 
   useEffect(() => {
@@ -22,33 +24,42 @@ export default function ChatWidget() {
     } catch (e) {}
   }, []);
   useEffect(() => {
-    try { sessionStorage.setItem("eq_chat", JSON.stringify(msgs.slice(-12))); } catch (e) {}
+    try { sessionStorage.setItem("eq_chat", JSON.stringify(msgs.slice(-16))); } catch (e) {}
     if (bodyRef.current) bodyRef.current.scrollTop = bodyRef.current.scrollHeight;
   }, [msgs, open]);
 
-  if (!API) return null;
+  /* make sure the catalogue is loaded so name lookups work */
+  useEffect(() => { if (open) loadRealEntries(); }, [open]);
 
-  async function send(e) {
-    e.preventDefault();
-    const q = input.trim();
-    if (!q || busy) return;
+  function ask(q) {
+    const question = q.trim();
+    if (!question) return;
     setInput("");
-    const next = [...msgs, { role: "user", text: q }];
-    setMsgs(next);
-    setBusy(true);
-    try {
-      const sid = (() => { try { return sessionStorage.getItem("eq_sid") || ""; } catch (e) { return ""; } })();
-      const r = await fetch(API + "/ask", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ q, sid, hist: next.slice(-7, -1) })
-      });
-      const d = await r.json().catch(() => ({}));
-      setMsgs((m) => [...m, { role: "assistant", text: d.a || d.error || "Something went wrong — email info@equireel.com and a human will help." }]);
-    } catch (err) {
-      setMsgs((m) => [...m, { role: "assistant", text: "I couldn't connect just now — email info@equireel.com and a human will help." }]);
-    }
-    setBusy(false);
+    const a = answer(question);
+    setMsgs((m) => [...m, { role: "user", text: question },
+      { role: "assistant", text: a.text, links: a.links, followups: a.followups }]);
+    track("chat", { q: question.slice(0, 120) });
   }
+
+  const Msg = ({ m }) => (
+    <div className={"cw-msg " + m.role}>
+      {m.text}
+      {m.links && m.links.length > 0 && (
+        <span className="cw-links">
+          {m.links.map((l, i) => (
+            <a key={i} href={l.to.startsWith("mailto:") ? l.to : href(l.to)}>{l.label}</a>
+          ))}
+        </span>
+      )}
+      {m.followups && m.followups.length > 0 && (
+        <span className="cw-chips">
+          {m.followups.map((f, i) => (
+            <button key={i} type="button" onClick={() => ask(f)}>{f}</button>
+          ))}
+        </span>
+      )}
+    </div>
+  );
 
   return (
     <>
@@ -60,23 +71,25 @@ export default function ChatWidget() {
         <div className="cw-panel" role="dialog" aria-label="Equireel assistant">
           <div className="cw-head">
             <strong>Equireel assistant</strong>
-            <span>Ordering &amp; delivery questions — instant answers</span>
+            <span>Instant answers — prices, delivery, finding your horse</span>
           </div>
           <div className="cw-body" ref={bodyRef}>
             {msgs.length === 0 && (
               <div className="cw-msg assistant">
-                Hi! Ask me anything about finding your horse, ordering a video, pricing or delivery. 🐎
+                Hi! Ask me anything — or type a horse or rider&rsquo;s name and I&rsquo;ll find them. 🐎
+                <span className="cw-chips">
+                  {STARTERS.map((s, i) => (
+                    <button key={i} type="button" onClick={() => ask(s)}>{s}</button>
+                  ))}
+                </span>
               </div>
             )}
-            {msgs.map((m, i) => (
-              <div key={i} className={"cw-msg " + m.role}>{m.text}</div>
-            ))}
-            {busy && <div className="cw-msg assistant cw-typing">…</div>}
+            {msgs.map((m, i) => <Msg key={i} m={m} />)}
           </div>
-          <form className="cw-input" onSubmit={send}>
+          <form className="cw-input" onSubmit={(e) => { e.preventDefault(); ask(input); }}>
             <input value={input} placeholder="e.g. How long until my video arrives?"
-              onChange={(e) => setInput(e.target.value)} maxLength={600} />
-            <button className="btn primary" disabled={busy} type="submit">Send</button>
+              onChange={(e) => setInput(e.target.value)} maxLength={200} />
+            <button className="btn primary" type="submit">Send</button>
           </form>
         </div>
       )}
