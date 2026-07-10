@@ -506,6 +506,22 @@ a.crumb:hover { color: var(--eq-red); background: rgba(193, 24, 54, 0.06); borde
 .cw-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
 .cw-chips button { background: #fff; border: 1px solid var(--eq-line); border-radius: 20px; padding: 4px 11px; font-size: 12px; cursor: pointer; }
 .cw-chips button:hover { border-color: var(--eq-red); color: var(--eq-red); }
+/* entries ingest (/admin/ingest) */
+.ig-sub { color: var(--eq-muted); font-size: 14px; margin-top: 4px; max-width: 640px; }
+.ig-event { display: flex; gap: 8px; flex-wrap: wrap; }
+.ig-event input, .ig-event select { padding: 10px 12px; border: 1.5px solid var(--eq-line); border-radius: 9px; font-size: 14px; }
+.ig-src { display: flex; align-items: center; gap: 16px; margin-bottom: 8px; flex-wrap: wrap; }
+.ig-check { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; color: var(--eq-muted); }
+.ig textarea { width: 100%; border: 1.5px solid var(--eq-line); border-radius: 9px; padding: 10px 12px; font-family: ui-monospace, monospace; font-size: 12.5px; }
+.ig-map { display: flex; gap: 12px; flex-wrap: wrap; }
+.ig-map label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--eq-muted); }
+.ig-map select { padding: 8px 10px; border: 1.5px solid var(--eq-line); border-radius: 8px; font-size: 13px; }
+.ig-preview { overflow-x: auto; border: 1px solid var(--eq-line); border-radius: 10px; }
+.ig-preview table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.ig-preview th, .ig-preview td { text-align: left; padding: 7px 12px; border-bottom: 1px solid var(--eq-line); white-space: nowrap; }
+.ig-preview th { background: var(--eq-cream); font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; }
+.ig-more { font-size: 12px; color: var(--eq-muted); padding: 6px 12px; }
+.aq-err { background: #fdeef1; color: var(--eq-red); border-radius: 10px; padding: 12px 14px; margin-top: 12px; font-size: 14px; font-weight: 600; }
 .cw-input { display: flex; gap: 7px; padding: 10px; border-top: 1px solid var(--eq-line); }
 .cw-input input { flex: 1; padding: 9px 12px; border: 1.5px solid var(--eq-line); border-radius: 9px; font-size: 13.5px; min-width: 0; }
 @media (max-width: 640px) { .cw-fab { bottom: 74px; } .cw-panel { bottom: 136px; } }
