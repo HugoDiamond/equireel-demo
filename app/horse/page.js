@@ -77,8 +77,12 @@ function HorseInner() {
 
   useEffect(() => {
     setMounted(true);
+    /* the flag default must follow the resolved event/entry (on direct loads
+       the initial state was computed against a placeholder before entries
+       arrived); a saved preference still wins — the flag belongs to the
+       rider, not the event */
     const saved = prefs.get();
-    if (saved.flag) setFlag(saved.flag);
+    setFlag(saved.flag || defaultFlagFor(ev, en));
     const t = setTimeout(() => {
       document.title = (en ? en.horse : "Order a Video") + " — " + ev.name + " — Equireel";
     }, 300);
