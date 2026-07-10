@@ -10,7 +10,7 @@ import { Header, Footer, Crumbs } from "../../components/Chrome";
 import HorseCard from "../../components/HorseCard";
 import {
   href, icons, EVENTS, getCountry, getEvent, getEntries, fmtRange,
-  siblingEditions, eventYear, onDataLoaded, sectionsOf
+  siblingEditions, eventYear, onDataLoaded, sectionsOf, loadArchiveEntries
 } from "../../lib/eq";
 
 function EventInner() {
@@ -26,7 +26,7 @@ function EventInner() {
   const [mounted, setMounted] = useState(false);
   const [, dataTick] = useState(0);
 
-  useEffect(() => onDataLoaded(() => dataTick((n) => n + 1)), []);
+  useEffect(() => { loadArchiveEntries(); return onDataLoaded(() => dataTick((n) => n + 1)); }, []);
 
   useEffect(() => {
     setMounted(true);

@@ -9,7 +9,7 @@ import { Header, Footer, Crumbs } from "../../components/Chrome";
 import HorseCard from "../../components/HorseCard";
 import Checkout from "../../components/Checkout";
 import { useState } from "react";
-import { href, getCountry, riderRounds, eventYear, fmtDate, icons, onDataLoaded, entriesLoaded, defaultFlagFor, tidyName } from "../../lib/eq";
+import { href, getCountry, riderRounds, eventYear, fmtDate, icons, onDataLoaded, entriesLoaded, defaultFlagFor, tidyName , loadArchiveEntries} from "../../lib/eq";
 
 function RiderInner() {
   const params = useSearchParams();
@@ -30,7 +30,7 @@ function RiderInner() {
     : null;
   const backEntry = backRound ? backRound.en : null;
 
-  useEffect(() => onDataLoaded(() => dataTick((n) => n + 1)), []);
+  useEffect(() => { loadArchiveEntries(); return onDataLoaded(() => dataTick((n) => n + 1)); }, []);
 
   useEffect(() => {
     const t = setTimeout(() => { document.title = tidyName(name) + " — Equireel"; }, 300);

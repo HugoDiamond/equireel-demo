@@ -5,7 +5,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import { asset, href, icons, searchResultsHTML, loadRealEntries } from "../lib/eq";
+import { asset, href, icons, searchResultsHTML, loadRealEntries, loadArchiveEntries } from "../lib/eq";
 import { track, pageview } from "../lib/track";
 import OrderBar from "./OrderBar";
 import ChatWidget from "./ChatWidget";
@@ -19,8 +19,14 @@ export function Header({ hideSearchInitially = false }) {
   const resultsRef = useRef(null);
 
   /* the header is on every page — kick off the real-entries fetch once,
-     and log the pageview (first-party, no cookies) */
-  useEffect(() => { loadRealEntries(); pageview(); }, []);
+     log the pageview (first-party, no cookies), and idle-prefetch the
+     2019-22 archive so search covers every season without slowing paint */
+  useEffect(() => {
+    loadRealEntries();
+    pageview();
+    const t = setTimeout(() => loadArchiveEntries(), 2500);
+    return () => clearTimeout(t);
+  }, []);
 
   /* search queries are marketing gold — log what settles, not every key */
   const searchTimer = useRef(null);
@@ -75,7 +81,7 @@ export function Header({ hideSearchInitially = false }) {
             <button
               className={"gs-btn" + (btnHidden ? " hidden" : "")}
               aria-label="Search"
-              onClick={() => { setGsHtml(""); setGsOpen(true); }}
+              onClick={() => { setGsHtml(""); setGsOpen(true); loadArchiveEntries(); }}
               dangerouslySetInnerHTML={{ __html: icons.search }}
             />
             <a className="pill" href={href("/#live")}>Order Videos</a>

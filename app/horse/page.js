@@ -15,7 +15,7 @@ import {
   href, asset, icons, EVENTS, getCountry, getEvent, findEntry, fmtRange, money,
   productPrices, deliveryOf, DELIVERY, FLAGS, defaultFlagFor, prefs,
   purchases, horseHistory, riderHistory, eventYear, onDataLoaded, entriesLoaded,
-  showcaseFor, basket, tidyName
+  showcaseFor, basket, tidyName, loadArchiveEntries
 } from "../../lib/eq";
 import * as player from "../../lib/player";
 
@@ -48,7 +48,7 @@ function HorseInner() {
   const [pubVideo, setPubVideo] = useState(null);
   const [, forceRender] = useState(0);
 
-  useEffect(() => onDataLoaded(() => forceRender((n) => n + 1)), []);
+  useEffect(() => { loadArchiveEntries(); return onDataLoaded(() => forceRender((n) => n + 1)); }, []);
 
   /* a delivered customer video for this exact round, made public by its
      owner — the site plays the real thing instead of a sample */
