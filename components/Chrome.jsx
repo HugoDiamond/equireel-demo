@@ -6,7 +6,9 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { asset, href, icons, searchResultsHTML, loadRealEntries } from "../lib/eq";
+import { track, pageview } from "../lib/track";
 import OrderBar from "./OrderBar";
+import ChatWidget from "./ChatWidget";
 
 export function Header({ hideSearchInitially = false }) {
   const pathname = usePathname();
@@ -16,8 +18,12 @@ export function Header({ hideSearchInitially = false }) {
   const inputRef = useRef(null);
   const resultsRef = useRef(null);
 
-  /* the header is on every page — kick off the real-entries fetch once */
-  useEffect(() => { loadRealEntries(); }, []);
+  /* the header is on every page — kick off the real-entries fetch once,
+     and log the pageview (first-party, no cookies) */
+  useEffect(() => { loadRealEntries(); pageview(); }, []);
+
+  /* search queries are marketing gold — log what settles, not every key */
+  const searchTimer = useRef(null);
 
   useEffect(() => {
     if (!hideSearchInitially) return;
@@ -39,7 +45,14 @@ export function Header({ hideSearchInitially = false }) {
     }
   }, [gsOpen]);
 
-  function onInput(e) { setGsHtml(searchResultsHTML(e.target.value)); }
+  function onInput(e) {
+    const q = e.target.value;
+    setGsHtml(searchResultsHTML(q));
+    clearTimeout(searchTimer.current);
+    if (q.trim().length >= 3) {
+      searchTimer.current = setTimeout(() => track("search", { q: q.trim().slice(0, 80) }), 900);
+    }
+  }
   function onKey(e) {
     if (e.key === "Enter" && resultsRef.current) {
       const a = resultsRef.current.querySelector("a");
@@ -99,6 +112,7 @@ export function Header({ hideSearchInitially = false }) {
       )}
 
       <OrderBar />
+      <ChatWidget />
     </>
   );
 }

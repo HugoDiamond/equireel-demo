@@ -33,6 +33,29 @@ function EventInner() {
     /* set after hydration settles so Next's streamed metadata can't overwrite it */
     const t = setTimeout(() => { document.title = ev.name + " " + eventYear(ev) + " — Equireel"; }, 300);
     try { localStorage.setItem("equireel_last_event", JSON.stringify({ id: ev.id, at: Date.now() })); } catch (e) {}
+    /* structured data: this event + its video product, for search + AI agents */
+    try {
+      const ld = document.createElement("script");
+      ld.type = "application/ld+json";
+      ld.id = "ev-ld";
+      ld.text = JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "Product",
+        name: "Cross Country Video — " + ev.name + " " + eventYear(ev),
+        description: "Professionally edited cross country video of your own round at " + ev.name + ". Filmed at every fence, delivered by email.",
+        brand: { "@type": "Brand", name: "Equireel" },
+        offers: {
+          "@type": "Offer",
+          price: String(ev.price),
+          priceCurrency: ev.country === "us" ? "USD" : ev.country === "gb" ? "GBP" : "EUR",
+          availability: "https://schema.org/InStock",
+          url: location.origin + "/event?id=" + ev.id
+        }
+      });
+      const old = document.getElementById("ev-ld");
+      if (old) old.remove();
+      document.head.appendChild(ld);
+    } catch (e) {}
     return () => clearTimeout(t);
   }, [ev.id, ev.name]);
 

@@ -10,6 +10,7 @@ import { useSearchParams } from "next/navigation";
 import { Header, Footer, Crumbs } from "../../components/Chrome";
 import HorseCard from "../../components/HorseCard";
 import Checkout from "../../components/Checkout";
+import NotifyMe from "../../components/NotifyMe";
 import {
   href, asset, icons, EVENTS, getCountry, getEvent, findEntry, fmtRange, money,
   productPrices, deliveryOf, DELIVERY, FLAGS, defaultFlagFor, prefs,
@@ -206,6 +207,7 @@ function HorseInner() {
             {owned && (
               <p className="hp-media-note owned-note">You own this video — click to watch the full round any time.</p>
             )}
+            {!ready && !owned && <NotifyMe ev={ev} en={en} />}
           </div>
 
           {/* ---- order panel ---- */}

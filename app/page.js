@@ -189,8 +189,8 @@ export default function Home() {
         <div className="container">
           <div className="proof-items">
             <span className="proof-item"><strong>88%</strong> of riders recommend us <span className="proof-src">· Facebook reviews</span></span>
-            <span className="proof-item"><strong>50,000+</strong> rounds delivered</span>
-            <span className="proof-item"><strong>200+</strong> events filmed each season</span>
+            <span className="proof-item"><strong>38,000+</strong> videos delivered <span className="proof-src">· since 2018</span></span>
+            <span className="proof-item"><strong>19,000+</strong> riders served</span>
           </div>
           <div className="partner-row partner-top"><PartnerLogos /></div>
         </div>

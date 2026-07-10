@@ -27,11 +27,14 @@ export default function PrivacyPage() {
           <li><strong>Payment:</strong> handled entirely by Stripe. We never see or store your card number; we receive confirmation of payment and the card's last four digits for our records.</li>
           <li><strong>Your order details:</strong> the round you bought and your video preferences (flag, music, sounds, public/private) — so the editors make the video you asked for.</li>
           <li><strong>Competition listings:</strong> horse, rider and section names shown on this site come from the public event programme and results, so you can find your ride.</li>
-          <li><strong>On this site:</strong> your basket and preferences are kept in your own browser's storage. We set <strong>no advertising or analytics cookies</strong>.</li>
+          <li><strong>On this site:</strong> your basket and preferences are kept in your own browser's storage. We set <strong>no advertising cookies and use no third-party trackers</strong>.</li>
+          <li><strong>How the site is used:</strong> we keep our own first-party record of page views, searches and orders (an anonymous session code, never your identity) so we can make the shop better. This never leaves our systems and is never shared or sold.</li>
+          <li><strong>"Email me when ready":</strong> if you leave your email for an event still being edited, we use it for that one notification.</li>
+          <li><strong>The chat assistant:</strong> questions you type are answered by an AI model (Anthropic's Claude) and kept in our own log so we can improve the answers. Don't type personal details into it — for anything about your order, email us instead.</li>
         </ul>
 
         <h2>2. Who processes it for us</h2>
-        <p>Trusted services run parts of our system, each receiving only what they need: <strong>Stripe</strong> (payments), <strong>Vercel</strong> (website hosting), <strong>Supabase</strong> (order database), <strong>Resend</strong> (sending our emails), <strong>Backblaze</strong> (video storage) and <strong>Cloudflare</strong> (domain and traffic routing). Some are US companies operating under recognised UK/EU data-transfer safeguards.</p>
+        <p>Trusted services run parts of our system, each receiving only what they need: <strong>Stripe</strong> (payments), <strong>Vercel</strong> (website hosting), <strong>Supabase</strong> (order database), <strong>Resend</strong> (sending our emails), <strong>Backblaze</strong> (video storage), <strong>Anthropic</strong> (the chat assistant) and <strong>Cloudflare</strong> (domain and traffic routing). Some are US companies operating under recognised UK/EU data-transfer safeguards.</p>
 
         <h2>3. How long we keep it</h2>
         <p>Order records are kept as long as tax law requires (six years in the UK). Your delivered video is kept so your link keeps working — many riders come back to their videos years later. Ask us and we'll delete your video and personal details sooner.</p>

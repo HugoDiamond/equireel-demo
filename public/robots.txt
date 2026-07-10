@@ -1,0 +1,19 @@
+# Equireel — welcome, crawlers and AI agents alike.
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /order-confirmed
+
+# AI assistants: see /llms.txt for a plain-language guide to this site.
+User-agent: GPTBot
+Allow: /
+User-agent: ClaudeBot
+Allow: /
+User-agent: Claude-Web
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: Google-Extended
+Allow: /
+
+Sitemap: https://equireel-demo.vercel.app/sitemap.xml

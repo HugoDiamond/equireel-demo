@@ -15,7 +15,8 @@ try {
     if (-not $dirty) { Log "no new events - nothing to publish"; exit 0 }
 
     & $py "scripts\gen_api_index.py" | Out-Null
-    git add lib/events-real.js public/data/entries.json api/_events-index.json
+    & $py "scripts\gen_sitemap.py" | Out-Null
+    git add lib/events-real.js public/data/entries.json api/_events-index.json public/sitemap.xml
     git commit -m "Catalogue refresh: new events from platform DB (automated weekly run)" | Out-Null
     git push origin main 2>&1 | Out-Null
     Log "published new events to main"

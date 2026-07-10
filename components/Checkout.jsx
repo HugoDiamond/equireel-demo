@@ -17,6 +17,7 @@ import {
   href, money, purchases, prefs, productPrices, deliveryOf, DELIVERY, FLAGS,
   eventYear, basket, tidyName
 } from "../lib/eq";
+import { track } from "../lib/track";
 
 const PRODUCT_NAMES = { xc: "Cross Country Video", sj: "Show Jumping Video", fence: "Single Fence Video" };
 const TIER_RANK = { instant: 0, fast: 1, standard: 2 };
@@ -78,7 +79,9 @@ export default function Checkout({ order, onClose, onComplete }) {
     const saved = prefs.get();
     setP({ faults: saved.faults, music: saved.music, sounds: saved.sounds, public: saved.public });
     document.body.style.overflow = "hidden";
+    track("checkout_open", { n: items.length, ev: first && first.ev && first.ev.id });
     return () => { document.body.style.overflow = ""; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const first = items[0];
@@ -144,6 +147,7 @@ export default function Checkout({ order, onClose, onComplete }) {
     purchases.setEmail(email);
     prefs.set(Object.assign(prefs.get(), { faults: p.faults, music: p.music, sounds: p.sounds, public: p.public, flag }));
     setBusy("card");
+    track("pay_click", { n: items.length, total: totalStr });
     try {
       const payload = {
         email, dvd: wantsDVD, address: wantsDVD ? address : "",
@@ -328,7 +332,8 @@ export default function Checkout({ order, onClose, onComplete }) {
                   {busy ? "Opening secure checkout…" : "Pay " + totalStr}
                 </button>
                 <p className="co2-note" style={{ textAlign: "center" }}>
-                  Secure payment by Stripe — card, Apple Pay and Google Pay.
+                  Secure payment by Stripe — card, Apple Pay and Google Pay.<br />
+                  Join 19,000+ riders · full refund any time before delivery.
                 </p>
               </>
             ) : (

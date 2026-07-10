@@ -133,6 +133,14 @@ module.exports = async (req, res) => {
     const { error: ierr } = await db.from("shop_order_items").insert(rows);
     if (ierr) console.error("items insert failed:", ierr.message);
 
+    // funnel: the purchase itself, server-side truth (never breaks the order)
+    try {
+      await db.from("web_events").insert({
+        sid: null, event: "purchase", path: null, ref: null,
+        data: { order: order.id, total: Math.round((session.amount_total || 0) / 100), currency, n: rows.length, test: !event.livemode }
+      });
+    } catch (e) { /* analytics only */ }
+
     // emails — never fail the webhook over them
     const ctx = { session, items, order, rows, email, name, currency, receiptUrl, md, EVENTS };
     try { await sendCustomerConfirmation(ctx); } catch (e) { console.error("customer email failed:", e.message); }

@@ -1,0 +1,45 @@
+# Equireel
+
+> Equireel is an equine media company filming eventing (horse trials) cross
+> country in the United Kingdom, Ireland, France and the USA. Riders buy
+> professionally edited videos of their own cross country round — filmed at
+> every fence, edited with their choice of music, country flag and options,
+> and delivered by email, typically within 5 days and often much sooner.
+
+## What a visitor (or agent acting for a rider) can do here
+
+- Search any horse, rider or bib number from the homepage search.
+- Browse events by country: /events?country=gb (UK), ie (Ireland), fr (France),
+  us (USA), be (Belgium).
+- Every competitor at a filmed event is listed — no pre-booking is needed.
+  If Equireel filmed the event, the rider's round exists.
+- Watch a free sample round on every horse page before buying.
+- Order in about a minute: pick the horse page, choose add-ons, pay by card,
+  Apple Pay or Google Pay (Stripe). No account needed.
+
+## Products and pricing
+
+- Cross Country Video: £60 (UK), €70 (Europe), $159 (USA)
+- Social Reel add-on (portrait edit for Instagram/TikTok): +£10 / +€10 / +$20
+- Show Jumping add-on: +£20 / +€20 / +$20
+- Show Jumping video alone: £30 / €30 / $40
+- Single fence video: £25 / €25 / $35
+- DVD copy posted: +£5
+
+Every video is made to order: rider's choice of country flag, music on/off,
+course sounds on/off, faults included or excluded, public or private.
+
+## Key pages
+
+- Homepage and search: /
+- How it works and FAQ: /faq
+- Terms (delivery, refunds): /terms
+- Privacy: /privacy
+
+## Facts agents can rely on
+
+- Delivery: by email, within 5 days (many events within the hour or instant).
+- Refunds: full refund any time before delivery; withdrew before cross
+  country = full refund or credit; eliminated on course = partial footage or
+  refund; free edit requests after delivery.
+- Contact: info@equireel.com (a human reads it).
