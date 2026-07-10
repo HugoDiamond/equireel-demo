@@ -26,8 +26,12 @@ const esc = (v) => {
 module.exports = async (req, res) => {
   if (cors(req, res)) return;
   if (req.method !== "GET") return res.status(405).json({ error: "GET only" });
+  // header auth for scripts; ?key= for direct browser downloads (Safari
+  // blocks script-triggered downloads after an async fetch, so the queue's
+  // button navigates here natively instead)
   const key = process.env.ADMIN_KEY;
-  if (!key || req.headers["x-admin-key"] !== key) return res.status(401).json({ error: "unauthorised" });
+  const provided = req.headers["x-admin-key"] || (req.query && req.query.key) || "";
+  if (!key || provided !== key) return res.status(401).json({ error: "unauthorised" });
 
   try {
     const db = supabase();

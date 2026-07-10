@@ -52,20 +52,12 @@ export default function OrdersQueue() {
     }).catch(() => {});
   }
 
-  /* interim manual-editing workflow: the legacy-format orders CSV */
-  async function downloadCsv() {
-    try {
-      const r = await fetch(API + "/orders-export", { headers: { "X-Admin-Key": key } });
-      if (!r.ok) return;
-      const blob = await r.blob();
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = "orders-" + new Date().toISOString().slice(0, 10) + ".csv";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(a.href), 5000);
-    } catch (e) { /* non-fatal */ }
+  /* interim manual-editing workflow: the legacy-format orders CSV.
+     Native navigation (not fetch+blob) — the server sends
+     Content-Disposition: attachment, so every browser including Safari
+     downloads it in place without leaving the page. */
+  function downloadCsv() {
+    window.location.href = API + "/orders-export?key=" + encodeURIComponent(key);
   }
 
   if (state === "demo") return <div className="aq-gate"><h1>Order queue</h1><p>Not available on the demo — use the live site.</p></div>;
