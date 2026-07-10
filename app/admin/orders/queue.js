@@ -52,6 +52,22 @@ export default function OrdersQueue() {
     }).catch(() => {});
   }
 
+  /* interim manual-editing workflow: the legacy-format orders CSV */
+  async function downloadCsv() {
+    try {
+      const r = await fetch(API + "/orders-export", { headers: { "X-Admin-Key": key } });
+      if (!r.ok) return;
+      const blob = await r.blob();
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "orders-" + new Date().toISOString().slice(0, 10) + ".csv";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+    } catch (e) { /* non-fatal */ }
+  }
+
   if (state === "demo") return <div className="aq-gate"><h1>Order queue</h1><p>Not available on the demo — use the live site.</p></div>;
   if (state === "init") return null;
 
@@ -127,6 +143,7 @@ export default function OrdersQueue() {
         <p className="aq-counts">
           <strong>{outstanding.length}</strong> outstanding · {delivered.length} delivered
           <button className="aq-refresh" onClick={() => load(key)}>Refresh</button>
+          <button className="aq-refresh" onClick={downloadCsv} title="Legacy-format orders sheet for the manual editing workflow">Download CSV</button>
         </p>
       </div>
       <h2 className="aq-sec">Outstanding</h2>
