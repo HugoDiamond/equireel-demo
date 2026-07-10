@@ -72,7 +72,7 @@ module.exports = async (req, res) => {
     });
     if (!r.ok) {
       console.error("anthropic error:", r.status, (await r.text()).slice(0, 200));
-      return res.status(502).json({ error: "assistant unavailable" });
+      return res.status(502).json({ error: "The assistant is having a moment — email info@equireel.com and a human will help." });
     }
     const data = await r.json();
     let answer = "";
