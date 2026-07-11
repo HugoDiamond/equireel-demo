@@ -9,7 +9,14 @@
 import { useState } from "react";
 import { icons, purchases, href, eventYear, fmtDate, basket, tidyName } from "../lib/eq";
 
-export default function HorseCard({ en, ev, mounted = true, showEvent = false, riderLink = true }) {
+/* result: optional [position, statusCode] from results-lite — renders a
+   small placing badge ("5th") or status chip ("EL") on career pages */
+function ordinal(n) {
+  const s = ["th", "st", "nd", "rd"], v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
+
+export default function HorseCard({ en, ev, mounted = true, showEvent = false, riderLink = true, result = null }) {
   const [, tick] = useState(0);
   const inBasket = mounted && basket.has(en.id);
   function quickAdd(e) {
@@ -47,6 +54,8 @@ export default function HorseCard({ en, ev, mounted = true, showEvent = false, r
           <div className="topline">
             <span className="bib">{en.bib}</span>
             {en.section && <span className="sec-label">{en.section}</span>}
+            {result && result[0] > 0 && <span className="pos-badge">{ordinal(result[0])}</span>}
+            {result && !result[0] && result[1] && <span className="pos-badge dnf">{result[1]}</span>}
           </div>
           <h3 className="ev-title">
             <img src={"https://flagcdn.com/w40/" + ev.country + ".png"} alt="" />

@@ -8,7 +8,7 @@ import { useSearchParams } from "next/navigation";
 import { Header, Footer, Crumbs } from "../../components/Chrome";
 import HorseCard from "../../components/HorseCard";
 import Checkout from "../../components/Checkout";
-import { href, horseRounds, onDataLoaded, entriesLoaded, defaultFlagFor } from "../../lib/eq";
+import { href, horseRounds, onDataLoaded, entriesLoaded, defaultFlagFor, loadResultsLite, resultFor } from "../../lib/eq";
 
 function HorseRunsInner() {
   const params = useSearchParams();
@@ -23,6 +23,7 @@ function HorseRunsInner() {
   const [checkout, setCheckout] = useState(null);
 
   useEffect(() => onDataLoaded(() => dataTick((n) => n + 1)), []);
+  useEffect(() => { loadResultsLite(); }, []);
 
   useEffect(() => {
     const t = setTimeout(() => { document.title = name + " — Equireel"; }, 300);
@@ -58,7 +59,9 @@ function HorseRunsInner() {
         {/* they arrived via the horse's name — each placard leads with the
             EVENT, the detail that differentiates and upsells */}
         <div className="horse-list">
-          {rounds.map(({ en, ev }) => <HorseCard key={en.id} en={en} ev={ev} showEvent={true} />)}
+          {rounds.map(({ en, ev }) => (
+            <HorseCard key={en.id} en={en} ev={ev} showEvent={true} result={resultFor(ev.id, en.bib)} />
+          ))}
         </div>
         {rounds.length === 0 && (
           <p className="empty-note">{entriesLoaded() ? "No runs on record for this horse." : "Loading…"}</p>

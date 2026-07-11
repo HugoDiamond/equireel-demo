@@ -17,12 +17,16 @@ try {
     $lnk = & $py "scripts\link_calendar.py" 2>&1 | Out-String
     Log ("link_calendar: " + ($lnk.Trim() -split "`n")[-1])
 
-    $dirty = git status --porcelain lib/events-real.js public/data/entries.json
+    # placing badges for career pages (positions from the platform DB)
+    $rl = & $py "scripts\gen_results_lite.py" 2>&1 | Out-String
+    Log ("results_lite: " + ($rl.Trim() -split "`n")[-1])
+
+    $dirty = git status --porcelain lib/events-real.js public/data/entries.json public/data/results-lite.json
     if (-not $dirty) { Log "no new events - nothing to publish"; exit 0 }
 
     & $py "scripts\gen_api_index.py" | Out-Null
     & $py "scripts\gen_sitemap.py" | Out-Null
-    git add lib/events-real.js public/data/entries.json api/_events-index.json public/sitemap.xml
+    git add lib/events-real.js public/data/entries.json public/data/results-lite.json api/_events-index.json public/sitemap.xml
     git commit -m "Catalogue refresh: new events from platform DB (automated weekly run)" | Out-Null
     git push origin main 2>&1 | Out-Null
     Log "published new events to main"
