@@ -16,4 +16,4 @@ Allow: /
 User-agent: Google-Extended
 Allow: /
 
-Sitemap: https://equireel-demo.vercel.app/sitemap.xml
+Sitemap: https://equireel.com/sitemap.xml

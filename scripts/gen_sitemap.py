@@ -4,7 +4,7 @@ import io, os, re
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-SITE = "https://equireel-demo.vercel.app"  # update at domain cut-over
+SITE = "https://equireel.com"  # canonical domain (cut over 2026-07)
 
 js = io.open(os.path.join(ROOT, "lib", "events-real.js"), encoding="utf-8").read()
 events = re.findall(r'\{ id: "([^"]+)".*?date: "([^"]+)"', js)

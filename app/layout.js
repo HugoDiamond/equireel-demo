@@ -1,7 +1,7 @@
 import "./globals.css";
 import { asset } from "../lib/eq";
 
-const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://equireel-demo.vercel.app";
+const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://equireel.com";
 
 export const metadata = {
   metadataBase: new URL(SITE),
