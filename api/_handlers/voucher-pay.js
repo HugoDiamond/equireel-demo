@@ -68,7 +68,9 @@ module.exports = async (req, res) => {
         status: isTest ? "Test" : "Processing", currency, charged: total,
         share_consent: anyPublic, include_faults: faults ? "yes" : "no",
         stripe_charge_id: chargeId, stripe_status: "voucher", stripe_paid: true,
-        stripe_receipt_email: email, promo: "GIFT VOUCHER " + normCode(body.voucher),
+        // promo is boolean in shop_orders; the voucher code is recoverable
+        // from stripe_charge_id and voucher_redemptions
+        stripe_receipt_email: email, promo: true,
         created_at: new Date().toISOString(),
         customer_id: customerId, shop_currency_id: CURRENCY_ID[currency] || null,
         shop_order_source_id: 1
