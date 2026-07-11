@@ -77,6 +77,7 @@ export function Header({ hideSearchInitially = false }) {
           </a>
           <nav className="eq-nav">
             <a className="nav-link" href={href("/#how")}>How it works</a>
+            <a className={"nav-link" + (pathname && pathname.startsWith("/calendar") ? " active" : "")} href={href("/calendar")}>Calendar</a>
             <a className={"nav-link" + (pathname && pathname.startsWith("/faq") ? " active" : "")} href={href("/faq")}>FAQ</a>
             <button
               className={"gs-btn" + (btnHidden ? " hidden" : "")}
@@ -175,7 +176,7 @@ export function Footer() {
           <span className="f-countries">
             <a href={href("/events?country=gb")}>UK</a> · <a href={href("/events?country=us")}>USA</a> · <a href={href("/events?country=fr")}>France</a> · <a href={href("/events?country=ie")}>Ireland</a> · <a href={href("/events?country=be")}>Belgium</a>
           </span>
-          <span className="f-meta"><a href={href("/faq")}>FAQ</a> · <a href={href("/terms")}>Terms</a> · <a href={href("/privacy")}>Privacy</a> · <a href="mailto:info@equireel.com">info@equireel.com</a></span>
+          <span className="f-meta"><a href={href("/calendar")}>Calendar</a> · <a href={href("/faq")}>FAQ</a> · <a href={href("/terms")}>Terms</a> · <a href={href("/privacy")}>Privacy</a> · <a href="mailto:info@equireel.com">info@equireel.com</a></span>
         </div>
       </div>
     </footer>
