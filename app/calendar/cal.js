@@ -10,8 +10,8 @@ import { href } from "../../lib/eq";
 import { track } from "../../lib/track";
 
 const API = process.env.NEXT_PUBLIC_CHECKOUT_API || "";
-const FLAG = { GBR: "gb", IRL: "ie", FRA: "fr", USA: "us", BEL: "be" };
-const COUNTRY = { GBR: "UK", IRL: "Ireland", FRA: "France", USA: "USA", BEL: "Belgium" };
+const FLAG = { GBR: "gb", IRL: "ie", FRA: "fr", USA: "us", BEL: "be", GER: "de" };
+const COUNTRY = { GBR: "UK", IRL: "Ireland", FRA: "France", USA: "USA", BEL: "Belgium", GER: "Germany" };
 const MONTHS = ["January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December"];
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];

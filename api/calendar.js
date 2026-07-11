@@ -9,7 +9,7 @@
 
 const { cors, supabase } = require("./_lib");
 
-const COUNTRIES = ["GBR", "IRL", "FRA", "USA", "BEL"];
+const COUNTRIES = ["GBR", "IRL", "FRA", "USA", "BEL", "GER"];
 
 module.exports = async (req, res) => {
   if (cors(req, res)) return;

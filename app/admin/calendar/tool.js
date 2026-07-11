@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 
 const API = process.env.NEXT_PUBLIC_CHECKOUT_API || "";
 const KEY_STORE = "equireel_admin_key";
-const COUNTRIES = [["GBR", "UK"], ["IRL", "Ireland"], ["FRA", "France"], ["USA", "USA"], ["BEL", "Belgium"]];
+const COUNTRIES = [["GBR", "UK"], ["IRL", "Ireland"], ["FRA", "France"], ["USA", "USA"], ["BEL", "Belgium"], ["GER", "Germany"]];
 
 const BLANK = { event_name: "", start_date: "", end_date: "", venue: "", country: "GBR", organiser: "" };
 
