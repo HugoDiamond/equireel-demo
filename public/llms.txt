@@ -13,6 +13,9 @@
   us (USA), be (Belgium).
 - Every competitor at a filmed event is listed — no pre-booking is needed.
   If Equireel filmed the event, the rider's round exists.
+- See which upcoming events Equireel is filming: /calendar ("Where we'll
+  be"). Riders can leave an email there to be told when their event's
+  videos go on sale.
 - Watch a free sample round on every horse page before buying.
 - Order in about a minute: pick the horse page, choose add-ons, pay by card,
   Apple Pay or Google Pay (Stripe). No account needed.
@@ -32,6 +35,7 @@ course sounds on/off, faults included or excluded, public or private.
 ## Key pages
 
 - Homepage and search: /
+- Filming calendar (upcoming events): /calendar
 - How it works and FAQ: /faq
 - Terms (delivery, refunds): /terms
 - Privacy: /privacy
