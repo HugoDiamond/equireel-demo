@@ -1,4 +1,4 @@
-﻿/* POST /api/voucher-checkout â€” buy a gift voucher.
+/* POST /api/voucher-checkout — buy a gift voucher.
    Body: { amount (whole units), currency "GBP"|"EUR", email (buyer),
            recipientName?, recipientEmail?, message? }
    Creates a Stripe Checkout Session on the matching regional account with
@@ -26,7 +26,7 @@ module.exports = async (req, res) => {
 
     const stripe = stripeFor(currency);
     const site = process.env.SITE_URL || "https://hugodiamond.github.io/equireel-demo";
-    const sym = currency === "EUR" ? "â‚¬" : "Â£";
+    const sym = currency === "EUR" ? "€" : "£";
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
@@ -37,7 +37,7 @@ module.exports = async (req, res) => {
           currency: currency.toLowerCase(),
           unit_amount: amount * 100,
           product_data: {
-            name: `Equireel Gift Voucher â€” ${sym}${amount}`,
+            name: `Equireel Gift Voucher — ${sym}${amount}`,
             description: recipientEmail ? `For ${b.recipientName || recipientEmail}` : "Emailed to you to give"
           }
         }
