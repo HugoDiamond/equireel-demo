@@ -10,6 +10,8 @@
 const { cors, supabase } = require("./_lib");
 
 const COUNTRIES = ["GBR", "IRL", "FRA", "USA", "BEL", "GER"];
+const TIMEZONES = ["America/New_York", "America/Chicago", "America/Denver", "America/Los_Angeles",
+  "Europe/London", "Europe/Dublin", "Europe/Paris", "Europe/Brussels", "Europe/Berlin"];
 
 module.exports = async (req, res) => {
   if (cors(req, res)) return;
@@ -48,6 +50,9 @@ module.exports = async (req, res) => {
         venue: String(b.venue || "").trim().slice(0, 255) || null,
         country, organiser: String(b.organiser || "").trim().slice(0, 255) || null,
         notes: String(b.notes || "").trim().slice(0, 2000) || null,
+        // venue timezone drives the 18:00-local evening collection;
+        // blank = country default (USA defaults Eastern)
+        timezone: TIMEZONES.includes(b.timezone) ? b.timezone : null,
         published: b.published !== false
       }).select("id").single();
       if (error) return res.status(500).json({ error: "insert failed" });

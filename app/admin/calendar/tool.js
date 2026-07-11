@@ -12,7 +12,13 @@ const API = process.env.NEXT_PUBLIC_CHECKOUT_API || "";
 const KEY_STORE = "equireel_admin_key";
 const COUNTRIES = [["GBR", "UK"], ["IRL", "Ireland"], ["FRA", "France"], ["USA", "USA"], ["BEL", "Belgium"], ["GER", "Germany"]];
 
-const BLANK = { event_name: "", start_date: "", end_date: "", venue: "", country: "GBR", organiser: "" };
+const BLANK = { event_name: "", start_date: "", end_date: "", venue: "", country: "GBR", organiser: "", timezone: "" };
+
+/* venue timezone drives the 18:00-local evening results collection;
+   "auto" = country default (USA defaults to Eastern) */
+const TIMEZONES = [["", "Timezone: auto"], ["America/New_York", "US Eastern"],
+  ["America/Chicago", "US Central"], ["America/Denver", "US Mountain"],
+  ["America/Los_Angeles", "US Pacific"]];
 
 export default function CalendarTool() {
   const [key, setKey] = useState("");
@@ -95,6 +101,11 @@ export default function CalendarTool() {
         <div className="ig-event" style={{ marginTop: 8 }}>
           <input placeholder="Venue (optional)" value={form.venue} onChange={(e) => setForm({ ...form, venue: e.target.value })} style={{ flex: 1 }} />
           <input placeholder="Organiser (optional)" value={form.organiser} onChange={(e) => setForm({ ...form, organiser: e.target.value })} style={{ flex: 1 }} />
+          {form.country === "USA" && (
+            <select value={form.timezone} onChange={(e) => setForm({ ...form, timezone: e.target.value })}>
+              {TIMEZONES.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+            </select>
+          )}
           <button className="btn primary" disabled={!canAdd} type="submit">{state === "busy" ? "Adding…" : "Add to calendar"}</button>
         </div>
       </form>
