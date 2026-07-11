@@ -3,12 +3,15 @@
    existed. Rows land in notify_requests; notified_at stays null until used. */
 
 const { cors, supabase } = require("./_lib");
+const careers = require("./_handlers/careers");
 
 module.exports = async (req, res) => {
   if (cors(req, res)) return;
   if (req.method !== "POST") return res.status(405).end();
   try {
     const b = typeof req.body === "object" && req.body ? req.body : JSON.parse(req.body || "{}");
+    // careers applications share this function (12-function Hobby cap)
+    if (b.kind === "careers") { req.body = b; return careers(req, res); }
     const email = String(b.email || "").trim().toLowerCase().slice(0, 255);
     if (!/.+@.+\..+/.test(email)) return res.status(400).json({ error: "valid email required" });
     await supabase().from("notify_requests").insert({

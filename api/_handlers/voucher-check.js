@@ -1,8 +1,8 @@
-/* GET /api/voucher-check?code=EQR-XXXX-XXXX[&currency=GBP] — checkout-time
+﻿/* GET /api/voucher-check?code=EQR-XXXX-XXXX[&currency=GBP] â€” checkout-time
    validation. The code itself is the bearer secret. */
 
-const { cors, supabase } = require("./_lib");
-const { checkVoucher } = require("./_vouchers");
+const { cors, supabase } = require("../_lib");
+const { checkVoucher } = require("../_vouchers");
 
 module.exports = async (req, res) => {
   if (cors(req, res)) return;

@@ -1,10 +1,10 @@
-/* POST /api/careers — camera-technician application capture (ported from the
+﻿/* POST /api/careers â€” camera-technician application capture (ported from the
    old equireel.co.uk "Work with Us" page). Writes careers_applications and
-   notifies the team inbox. Deliberately quiet on the site — a data capture
+   notifies the team inbox. Deliberately quiet on the site â€” a data capture
    for when roles open, not a live vacancy board. */
 
-const { cors, supabase } = require("./_lib");
-const { sendFulfilmentNote, esc } = require("./_email");
+const { cors, supabase } = require("../_lib");
+const { sendFulfilmentNote, esc } = require("../_email");
 
 const COUNTRIES = ["UK", "IRL", "USA"];
 
@@ -36,14 +36,14 @@ module.exports = async (req, res) => {
     if (error) { console.error("careers insert failed:", error.message); return res.status(500).json({ error: "unavailable" }); }
 
     try {
-      await sendFulfilmentNote(`Careers application — ${name} (${row.country})`,
+      await sendFulfilmentNote(`Careers application â€” ${name} (${row.country})`,
         `<p><strong>New camera-technician application</strong></p>
          <ul>
            <li>Name: ${esc(name)} (${esc(row.age || "?")})</li>
-           <li>Email: ${esc(email)} · Phone: ${esc(row.phone || "—")}</li>
-           <li>Country: ${esc(row.country)} · Location: ${esc(row.location || "—")}</li>
-           <li>Licence: ${esc(row.licence || "—")} · Available from: ${esc(row.available_from || "—")}
-               · Weekends/month: ${esc(row.weekends_per_month || "—")}</li>
+           <li>Email: ${esc(email)} Â· Phone: ${esc(row.phone || "â€”")}</li>
+           <li>Country: ${esc(row.country)} Â· Location: ${esc(row.location || "â€”")}</li>
+           <li>Licence: ${esc(row.licence || "â€”")} Â· Available from: ${esc(row.available_from || "â€”")}
+               Â· Weekends/month: ${esc(row.weekends_per_month || "â€”")}</li>
          </ul>
          <p>${esc(row.experience || "(no experience notes)")}</p>`);
     } catch (e) { console.error("careers notify failed:", e.message); }

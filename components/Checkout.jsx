@@ -124,7 +124,7 @@ export default function Checkout({ order, onClose, onComplete }) {
     if (!totalInfo || !CHECKOUT_API) return;
     setVBusy(true); setVErr("");
     try {
-      const r = await fetch(CHECKOUT_API + "/voucher-check?code=" + encodeURIComponent(vCode.trim()) +
+      const r = await fetch(CHECKOUT_API + "/vouchers?code=" + encodeURIComponent(vCode.trim()) +
         "&currency=" + totalInfo.code);
       const d = await r.json().catch(() => ({}));
       if (d.ok) { setVApplied({ balance: d.balance }); track("voucher_apply", {}); }
@@ -205,8 +205,9 @@ export default function Checkout({ order, onClose, onComplete }) {
 
       // fully voucher-covered: no card, no Stripe — pay straight from balance
       if (vCovers) {
-        const r0 = await fetch(CHECKOUT_API + "/voucher-pay", {
-          method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload)
+        const r0 = await fetch(CHECKOUT_API + "/vouchers", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...payload, action: "pay" })
         });
         const d0 = await r0.json().catch(() => ({}));
         if (r0.ok && d0.ok) {

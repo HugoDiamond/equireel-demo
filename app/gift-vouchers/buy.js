@@ -37,9 +37,10 @@ export default function BuyVoucher() {
     if (!API) { setErr("Ordering runs on the live site."); return; }
     setState("busy"); setErr("");
     try {
-      const r = await fetch(API + "/voucher-checkout", {
+      const r = await fetch(API + "/vouchers", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          action: "checkout",
           amount: amt, currency: cur, email: f.email,
           recipientName: toThem ? f.recipientName : "",
           recipientEmail: toThem ? f.recipientEmail : "",

@@ -21,9 +21,9 @@ export default function CareersForm() {
     if (!API) { setState("err"); return; }
     setState("busy");
     try {
-      const r = await fetch(API + "/careers", {
+      const r = await fetch(API + "/notify", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(f)
+        body: JSON.stringify({ ...f, kind: "careers" })
       });
       if (!r.ok) { setState("err"); return; }
       track("careers_apply", { c: f.country });

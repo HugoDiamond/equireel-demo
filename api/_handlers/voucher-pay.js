@@ -1,16 +1,16 @@
-/* POST /api/voucher-pay — an order FULLY covered by a gift voucher: no card,
+﻿/* POST /api/voucher-pay â€” an order FULLY covered by a gift voucher: no card,
    no Stripe. Body matches /create-checkout ({email, items, voucher}).
-   Sequence: server-side pricing → atomic balance deduct (double-spend guard)
-   → order write in the same legacy-compatible shape as the webhook → emails.
+   Sequence: server-side pricing â†’ atomic balance deduct (double-spend guard)
+   â†’ order write in the same legacy-compatible shape as the webhook â†’ emails.
    If the order write fails after deduction, the balance is restored and
    fulfilment alerted. */
 
 const {
   EVENTS, CURRENCY_OF, itemLines, PRODUCT_LABEL, COUNTRY_LABEL, CURRENCY_ID,
   equireelLabel, cors, supabase
-} = require("./_lib");
-const { checkVoucher, deductVoucher, normCode } = require("./_vouchers");
-const { sendCustomerConfirmation, sendFulfilmentOrder, sendFulfilmentNote } = require("./_email");
+} = require("../_lib");
+const { checkVoucher, deductVoucher, normCode } = require("../_vouchers");
+const { sendCustomerConfirmation, sendFulfilmentOrder, sendFulfilmentNote } = require("../_email");
 
 module.exports = async (req, res) => {
   if (cors(req, res)) return;
@@ -38,12 +38,12 @@ module.exports = async (req, res) => {
     const chk = await checkVoucher(db, body.voucher, currency);
     if (!chk.ok) return res.status(400).json({ error: "voucher", message: "Voucher can't be used (" + chk.reason + ")." });
     if (chk.voucher.balance < total) {
-      return res.status(400).json({ error: "voucher", message: "Voucher doesn't cover this order — pay the difference by card instead." });
+      return res.status(400).json({ error: "voucher", message: "Voucher doesn't cover this order â€” pay the difference by card instead." });
     }
 
     // deduct FIRST (atomic); restore on any later failure
     if (!(await deductVoucher(db, chk.voucher.id, total, null))) {
-      return res.status(409).json({ error: "voucher", message: "That voucher was just used elsewhere — check its balance." });
+      return res.status(409).json({ error: "voucher", message: "That voucher was just used elsewhere â€” check its balance." });
     }
 
     try {
@@ -116,11 +116,11 @@ module.exports = async (req, res) => {
 
       return res.status(200).json({ ok: true, order: order.id });
     } catch (err) {
-      // restore the balance — the customer was not served
+      // restore the balance â€” the customer was not served
       try {
         const { data: v } = await db.from("gift_vouchers").select("balance").eq("id", chk.voucher.id).single();
         if (v) await db.from("gift_vouchers").update({ balance: v.balance + total }).eq("id", chk.voucher.id);
-        await sendFulfilmentNote("VOUCHER-PAY FAILED — balance restored",
+        await sendFulfilmentNote("VOUCHER-PAY FAILED â€” balance restored",
           `<p>voucher ${normCode(body.voucher)} deducted ${total} ${currency} but the order write failed
            (${String(err.message)}). Balance restored; customer ${email} saw an error.</p>`);
       } catch (e2) { console.error("restore failed:", e2.message); }
