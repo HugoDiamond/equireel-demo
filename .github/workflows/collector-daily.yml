@@ -1,0 +1,44 @@
+# Daily morning sweep: feed discovery + deep collection + identity linking.
+# Cloud-native: no device involved; secrets from repo settings.
+name: collector-daily
+on:
+  schedule:
+    - cron: "40 4 * * *"   # 05:40 UK summer / 04:40 winter
+  workflow_dispatch: {}
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -r data_collection/requirements.txt
+      - name: discovery
+        env: { DATABASE_URL: "${{ secrets.DATABASE_URL }}", RESEND_API_KEY: "${{ secrets.RESEND_API_KEY }}" }
+        run: python -m data_collection.discover
+      - name: deep collection
+        env: { DATABASE_URL: "${{ secrets.DATABASE_URL }}", RESEND_API_KEY: "${{ secrets.RESEND_API_KEY }}" }
+        run: python -m data_collection.collect
+      - name: identity linking
+        env: { DATABASE_URL: "${{ secrets.DATABASE_URL }}" }
+        run: python -m data_collection.identity
+      - name: buyer-overlap report
+        env: { DATABASE_URL: "${{ secrets.DATABASE_URL }}" }
+        run: python -m data_collection.reports
+      - name: archive snapshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: snapshots-daily-${{ github.run_id }}
+          path: data_collection/snapshots/
+          retention-days: 90
+          if-no-files-found: ignore
+      - name: alert on failure
+        if: failure()
+        env: { RESEND_API_KEY: "${{ secrets.RESEND_API_KEY }}" }
+        run: |
+          curl -s -X POST https://api.resend.com/emails \
+            -H "Authorization: Bearer $RESEND_API_KEY" -H "Content-Type: application/json" \
+            -d '{"from":"Equireel <info@equireel.com>","to":["info@equireel.com"],"subject":"[collector] DAILY RUN FAILED","html":"collector-daily failed: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}'

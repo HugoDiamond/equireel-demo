@@ -1,0 +1,48 @@
+# Fence-level live XC capture — two shifts covering the UK filming day
+# (live boards exist on the EventingScores family = UK events). Stateless:
+# each shift seeds from the DB, so the handover loses nothing. Exits in
+# seconds on non-filming days. TZ pinned to Europe/London because the
+# poller stamps actual start times with local now() — a UTC runner would
+# record UK starts an hour early in summer.
+name: liveboard
+on:
+  schedule:
+    - cron: "35 6 * * *"    # AM shift: 07:35 UK summer, runs to 13:25
+    - cron: "20 12 * * *"   # PM shift: 13:20 UK summer, runs to 19:05
+  workflow_dispatch: {}
+
+jobs:
+  poll:
+    runs-on: ubuntu-latest
+    timeout-minutes: 355    # GitHub hard-kills jobs at 360; shifts sized to fit
+    env:
+      TZ: Europe/London
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -r data_collection/requirements.txt
+      - name: poll live boards until shift end
+        env: { DATABASE_URL: "${{ secrets.DATABASE_URL }}" }
+        # UNTIL is UK-local (TZ above). PM shift ends 19:05 — 25 min before
+        # the local task's 19:30, forced by the 6h job cap; the end-of-shift
+        # results sweep still lands final results the same evening.
+        run: |
+          HOUR=$(date -u +%H)
+          if [ "$HOUR" -lt 12 ]; then UNTIL="13:25"; else UNTIL="19:05"; fi
+          python -m data_collection.liveboard --until "$UNTIL"
+      - name: archive board snapshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: liveboard-${{ github.run_id }}
+          path: data_collection/snapshots/
+          retention-days: 90
+          if-no-files-found: ignore
+      - name: alert on failure
+        if: failure()
+        env: { RESEND_API_KEY: "${{ secrets.RESEND_API_KEY }}" }
+        run: |
+          curl -s -X POST https://api.resend.com/emails \
+            -H "Authorization: Bearer $RESEND_API_KEY" -H "Content-Type: application/json" \
+            -d '{"from":"Equireel <info@equireel.com>","to":["info@equireel.com"],"subject":"[collector] LIVEBOARD SHIFT FAILED (fence data at risk)","html":"liveboard failed mid-shift — fence capture degraded until next shift or local fallback: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}'

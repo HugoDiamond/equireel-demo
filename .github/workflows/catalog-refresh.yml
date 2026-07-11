@@ -1,0 +1,47 @@
+# Daily catalogue publish: platform DB -> site data files -> commit -> Vercel
+# auto-deploys. Mirrors scripts/catalog_refresh.ps1. A GITHUB_TOKEN push does
+# NOT trigger other workflows (no recursion) but DOES trigger Vercel.
+name: catalog-refresh
+on:
+  schedule:
+    - cron: "0 8 * * *"   # 09:00 UK summer — after the 05:40 collector run
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install psycopg2-binary
+      - name: regenerate site data
+        env: { DATABASE_URL: "${{ secrets.DATABASE_URL }}" }
+        run: |
+          python scripts/gen_catalog.py
+          python scripts/link_calendar.py
+          python scripts/gen_results_lite.py
+      - name: publish if changed
+        env: { DATABASE_URL: "${{ secrets.DATABASE_URL }}" }
+        run: |
+          if [ -z "$(git status --porcelain lib/events-real.js public/data/entries.json public/data/results-lite.json)" ]; then
+            echo "no new events - nothing to publish"; exit 0
+          fi
+          python scripts/gen_api_index.py
+          python scripts/gen_sitemap.py
+          git config user.name "equireel-collector"
+          git config user.email "info@equireel.com"
+          git add lib/events-real.js public/data/entries.json public/data/results-lite.json api/_events-index.json public/sitemap.xml
+          git commit -m "Catalogue refresh: new events from platform DB (automated daily run)"
+          git push origin main
+      - name: alert on failure
+        if: failure()
+        env: { RESEND_API_KEY: "${{ secrets.RESEND_API_KEY }}" }
+        run: |
+          curl -s -X POST https://api.resend.com/emails \
+            -H "Authorization: Bearer $RESEND_API_KEY" -H "Content-Type: application/json" \
+            -d '{"from":"Equireel <info@equireel.com>","to":["info@equireel.com"],"subject":"[collector] CATALOG REFRESH FAILED","html":"catalog-refresh failed: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}'

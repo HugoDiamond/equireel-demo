@@ -14,3 +14,9 @@ scripts/out/
 .env
 .env.*
 !.env.example
+
+# internal docs — repo is public, these stay local only
+docs/
+
+# collector runtime output (archived as GitHub Actions artifacts instead)
+data_collection/snapshots/

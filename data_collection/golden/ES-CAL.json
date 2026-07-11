@@ -1,0 +1,1 @@
+[{"name": "g1", "fn": "parse", "input": {"calendar": [{"id": 1, "eventname": "Test Event", "startdate": "2026-01-01"}]}, "output": [{"ref": 1, "name": "Test Event", "start": "2026-01-01"}]}]

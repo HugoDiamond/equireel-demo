@@ -1,0 +1,28 @@
+# Evening results: 18:00 at the venue, hourly until complete (David's
+# editing SLA). Hourly ticks spanning Berlin evening to US Pacific evening;
+# each tick gates per-event on venue-local time; state in collection_state.
+name: collector-evening
+on:
+  schedule:
+    - cron: "5 15-23,0-3 * * *"   # UTC — covers 18:00 local from CET to Pacific
+  workflow_dispatch: {}
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -r data_collection/requirements.txt
+      - name: evening tick
+        env: { DATABASE_URL: "${{ secrets.DATABASE_URL }}", RESEND_API_KEY: "${{ secrets.RESEND_API_KEY }}" }
+        run: python -m data_collection.evening
+      - name: alert on failure
+        if: failure()
+        env: { RESEND_API_KEY: "${{ secrets.RESEND_API_KEY }}" }
+        run: |
+          curl -s -X POST https://api.resend.com/emails \
+            -H "Authorization: Bearer $RESEND_API_KEY" -H "Content-Type: application/json" \
+            -d '{"from":"Equireel <info@equireel.com>","to":["info@equireel.com"],"subject":"[collector] EVENING TICK FAILED","html":"collector-evening failed: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}'
