@@ -31,7 +31,7 @@ export default function CalendarTool() {
 
   async function refresh() {
     try {
-      const r = await fetch(API + "/calendar");
+      const r = await fetch(API + "/calendar?t=" + Date.now());
       const d = await r.json();
       setRows(d.events || []);
     } catch (e) { setRows([]); }
