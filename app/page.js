@@ -64,6 +64,19 @@ export default function Home() {
 
   /* region detection — same storage keys and fallbacks as v1 */
   useEffect(() => {
+    // hreflang pair with the French landing (client-injected — this page is
+    // a client component so it can't export metadata alternates)
+    if (!document.querySelector('link[hreflang="fr"]')) {
+      for (const [lang, path] of [["fr", "/fr"], ["en", "/"]]) {
+        const l = document.createElement("link");
+        l.rel = "alternate"; l.hreflang = lang;
+        l.href = window.location.origin + path;
+        document.head.appendChild(l);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
     const stored = sessionStorage.getItem("eq_country");
     if (stored) { setCountry(stored === "none" ? null : stored); }
     else {

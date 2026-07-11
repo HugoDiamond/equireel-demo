@@ -176,7 +176,7 @@ export function Footer() {
           <span className="f-countries">
             <a href={href("/events?country=gb")}>UK</a> · <a href={href("/events?country=us")}>USA</a> · <a href={href("/events?country=fr")}>France</a> · <a href={href("/events?country=ie")}>Ireland</a> · <a href={href("/events?country=be")}>Belgium</a>
           </span>
-          <span className="f-meta"><a href={href("/my-videos")}>My Videos</a> · <a href={href("/calendar")}>Calendar</a> · <a href={href("/gift-vouchers")}>Gift Vouchers</a> · <a href={href("/faq")}>FAQ</a> · <a href={href("/terms")}>Terms</a> · <a href={href("/privacy")}>Privacy</a> · <a href={href("/careers")}>Work with us</a> · <a href="mailto:info@equireel.com">info@equireel.com</a></span>
+          <span className="f-meta"><a href={href("/my-videos")}>My Videos</a> · <a href={href("/calendar")}>Calendar</a> · <a href={href("/gift-vouchers")}>Gift Vouchers</a> · <a href={href("/faq")}>FAQ</a> · <a href={href("/terms")}>Terms</a> · <a href={href("/privacy")}>Privacy</a> · <a href={href("/careers")}>Work with us</a> · <a href={href("/fr")} lang="fr">Français</a> · <a href="mailto:info@equireel.com">info@equireel.com</a></span>
         </div>
       </div>
     </footer>

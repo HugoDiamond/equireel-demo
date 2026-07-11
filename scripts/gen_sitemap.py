@@ -1,6 +1,8 @@
-# Emit public/sitemap.xml — static pages + every event page.
+# Emit public/sitemap.xml — static pages + every event page + horse/rider
+# career pages (long-tail SEO: owners google their horse's name).
 # Regenerate after gen_catalog.py adds events (catalog_refresh runs both).
-import io, os, re
+import collections, io, json, os, re
+from urllib.parse import quote
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -9,13 +11,25 @@ SITE = "https://equireel-demo.vercel.app"  # update at domain cut-over
 js = io.open(os.path.join(ROOT, "lib", "events-real.js"), encoding="utf-8").read()
 events = re.findall(r'\{ id: "([^"]+)".*?date: "([^"]+)"', js)
 
+# horse career pages: horses with >=3 filmed rounds (site page: /horses?name=)
+entries = json.load(io.open(os.path.join(ROOT, "public", "data", "entries.json"), encoding="utf-8"))
+horse_rounds = collections.Counter()
+for rows in entries.values():
+    for r in rows:
+        if r[1]:
+            horse_rounds[r[1].strip()] += 1
+horses = sorted(h for h, n in horse_rounds.items() if n >= 3)
+
 urls = [(SITE + "/", "1.0"), (SITE + "/calendar", "0.9"), (SITE + "/gift-vouchers", "0.8"),
-        (SITE + "/faq", "0.8"), (SITE + "/careers", "0.4"),
+        (SITE + "/faq", "0.8"), (SITE + "/fr", "0.8"), (SITE + "/fr/faq", "0.6"),
+        (SITE + "/careers", "0.4"),
         (SITE + "/terms", "0.3"), (SITE + "/privacy", "0.3")]
 for c in ("gb", "ie", "us", "fr", "be"):
     urls.append((SITE + "/events?country=" + c, "0.9"))
 for eid, date in events:
     urls.append((SITE + "/event?id=" + eid, "0.7"))
+for h in horses:
+    urls.append((SITE + "/horses?name=" + quote(h), "0.4"))
 
 out = ['<?xml version="1.0" encoding="UTF-8"?>',
        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
