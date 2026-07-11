@@ -8,6 +8,8 @@
    the order to the platform DB only after payment succeeds. */
 
 const { EVENTS, CURRENCY_OF, stripeFor, itemLines, productPrices, cors } = require("./_lib");
+const { checkVoucher, normCode } = require("./_vouchers");
+const { supabase } = require("./_lib");
 
 module.exports = async (req, res) => {
   if (cors(req, res)) return;
@@ -76,11 +78,37 @@ module.exports = async (req, res) => {
       }).slice(0, 500);
     });
 
+    // gift-voucher redemption: validate server-side, apply as a one-off
+    // Stripe coupon; the webhook deducts the balance after payment succeeds.
+    // (Orders fully covered by a voucher never reach here — /api/voucher-pay.)
+    let discounts;
+    if (body.voucher) {
+      const total = line_items.reduce((s, l) => s + l.price_data.unit_amount, 0); // pence/cents
+      const chk = await checkVoucher(supabase(), body.voucher, currency);
+      if (!chk.ok) {
+        const why = { not_found: "That voucher code wasn't recognised.", used: "That voucher has no balance left.",
+          expired: "That voucher has expired.", currency: "That voucher is in a different currency to this order.",
+          invalid: "That voucher code doesn't look right." }[chk.reason] || "Voucher can't be used.";
+        return res.status(400).json({ error: "voucher", message: why });
+      }
+      const off = Math.min(chk.voucher.balance * 100, total - 100); // leave ≥1 unit to pay on this path
+      if (off > 0) {
+        const coupon = await stripe.coupons.create({
+          amount_off: off, currency: currency.toLowerCase(), duration: "once",
+          name: "Gift voucher " + normCode(body.voucher)
+        });
+        discounts = [{ coupon: coupon.id }];
+        metadata.vc = normCode(body.voucher);
+        metadata.vd = String(Math.round(off / 100));
+      }
+    }
+
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       customer_email: body.email,
       line_items,
       metadata,
+      ...(discounts ? { discounts } : {}),
       success_url: site + "/order-confirmed?sid={CHECKOUT_SESSION_ID}",
       cancel_url: site + "/order-confirmed?cancelled=1"
     });

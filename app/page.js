@@ -287,6 +287,18 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="container section-block gift-band">
+        <div className="gift-card">
+          <div className="gift-copy">
+            <p className="eyebrow">Gift vouchers</p>
+            <h2 className="section-title">The present every rider actually wants</h2>
+            <p>Any amount from £10/€10 — they pick their own round, filmed at every fence.
+              Emailed instantly with your message, valid 24 months.</p>
+          </div>
+          <a className="btn primary big" href={href("/gift-vouchers")}>Buy a Gift Voucher</a>
+        </div>
+      </section>
+
       <section className="cta-band">
         <div className="container">
           <h2>Ready to watch your round?</h2>

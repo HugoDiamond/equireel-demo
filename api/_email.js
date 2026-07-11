@@ -89,9 +89,46 @@ async function sendVideoDelivery({ to, url, label, horse, product, event }) {
     </p>
     <p style="color:#777;font-size:13px">Direct link (save it — it's yours to keep):<br>
       <a href="${esc(url)}" style="color:#C11836;word-break:break-all">${esc(url)}</a></p>
+    <p style="color:#777;font-size:13px">All your videos, any time — no password needed:
+      <a href="${esc((process.env.SITE_URL || "https://equireel-demo.vercel.app") + "/my-videos")}" style="color:#C11836">My Videos</a></p>
     <p style="color:#777;font-size:13px">Edit requests are free — just reply to this email.</p>
   </div>`;
   await send(to, `Your video is ready — ${horse}`, html);
+}
+
+async function sendVoucherEmails({ code, amount, currency, buyerEmail, recipientEmail, recipientName, message, test }) {
+  const sym = CUR[currency] || "£";
+  const site = process.env.SITE_URL || "https://equireel-demo.vercel.app";
+  const testTag = test ? " [TEST]" : "";
+  const giftHtml = (greeting) => `
+  <div style="font-family:-apple-system,Segoe UI,sans-serif;max-width:560px;margin:0 auto;color:#1a1a1a">
+    <div style="border-top:4px solid #C11836;padding:24px 0 8px"><strong style="font-size:20px">EQUIREEL</strong></div>
+    <h2 style="font-weight:600">${greeting}</h2>
+    ${message ? `<p style="font-style:italic;border-left:3px solid #C11836;padding-left:12px">&ldquo;${esc(message)}&rdquo;</p>` : ""}
+    <div style="background:#F7F6F7;border-radius:12px;padding:22px;text-align:center;margin:20px 0">
+      <div style="font-size:13px;color:#777;letter-spacing:1px">GIFT VOUCHER</div>
+      <div style="font-size:30px;font-weight:800;margin:6px 0">${sym}${amount}</div>
+      <div style="font-size:20px;font-weight:700;letter-spacing:2px;font-family:monospace">${esc(code)}</div>
+    </div>
+    <p>Spend it on any Equireel video — find the horse at <a href="${esc(site)}" style="color:#C11836">${esc(site.replace(/^https?:\/\//, ""))}</a>
+    and enter the code at checkout. Valid 24 months; any remaining balance stays on the code.</p>
+  </div>`;
+
+  if (recipientEmail) {
+    await send(recipientEmail, `${recipientName ? esc(recipientName) + ", someone" : "Someone"} sent you an Equireel gift voucher${testTag}`,
+      giftHtml(`${recipientName ? esc(recipientName) + " — a" : "A"} gift for you 🎥`));
+    await send(buyerEmail, `Your Equireel gift voucher was sent${testTag}`, `
+  <div style="font-family:-apple-system,Segoe UI,sans-serif;max-width:560px;margin:0 auto;color:#1a1a1a">
+    <div style="border-top:4px solid #C11836;padding:24px 0 8px"><strong style="font-size:20px">EQUIREEL</strong></div>
+    <h2 style="font-weight:600">Gift sent ✓</h2>
+    <p>Your ${sym}${amount} voucher <strong style="font-family:monospace">${esc(code)}</strong> has been emailed to
+    <strong>${esc(recipientEmail)}</strong>. Keep this email as your receipt — if it doesn't arrive, just forward
+    them the code.</p>
+  </div>`);
+  } else {
+    await send(buyerEmail, `Your Equireel gift voucher — ${sym}${amount}${testTag}`,
+      giftHtml("Your gift voucher is ready to give 🎁"));
+  }
 }
 
 async function sendFulfilmentNote(subject, html) {
@@ -100,4 +137,4 @@ async function sendFulfilmentNote(subject, html) {
   await send(to, subject, `<div style="font-family:monospace;font-size:14px">${html}</div>`);
 }
 
-module.exports = { sendCustomerConfirmation, sendFulfilmentOrder, sendVideoDelivery, sendFulfilmentNote };
+module.exports = { send, esc, sendCustomerConfirmation, sendFulfilmentOrder, sendVideoDelivery, sendFulfilmentNote, sendVoucherEmails };

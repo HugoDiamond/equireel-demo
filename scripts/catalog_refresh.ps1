@@ -11,6 +11,12 @@ Set-Location $repo
 try {
     $out = & $py "scripts\gen_catalog.py" 2>&1 | Out-String
     Log ("gen_catalog: " + ($out.Trim() -split "`n")[-1])
+
+    # link the public filming calendar to any events now in the catalogue
+    # (flips /calendar rows from "Notify me" to "Find your horse")
+    $lnk = & $py "scripts\link_calendar.py" 2>&1 | Out-String
+    Log ("link_calendar: " + ($lnk.Trim() -split "`n")[-1])
+
     $dirty = git status --porcelain lib/events-real.js public/data/entries.json
     if (-not $dirty) { Log "no new events - nothing to publish"; exit 0 }
 

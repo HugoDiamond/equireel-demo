@@ -15,12 +15,12 @@ module.exports = async (req, res) => {
 
   try {
     const db = supabase();
-    // new-storefront orders only: they carry a Stripe payment-intent id
-    // (pi_...); legacy shop history synced from Mongo does not
+    // new-storefront orders only: pi_% (Stripe card) + vch_% (fully
+    // voucher-paid); legacy shop history synced from Mongo has neither
     const { data: orders, error } = await db.from("shop_orders")
       .select("id, status, currency, charged, stripe_receipt_email, share_consent, include_faults, created_at")
       .eq("shop_order_source_id", 1).in("status", PAID)
-      .like("stripe_charge_id", "pi_%")
+      .or("stripe_charge_id.like.pi_%,stripe_charge_id.like.vch_%")
       .order("id", { ascending: false }).limit(120);
     if (error) return res.status(500).json({ error: "orders lookup failed" });
 

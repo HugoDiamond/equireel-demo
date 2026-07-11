@@ -107,15 +107,21 @@ conn = psycopg2.connect(url)
 conn.set_session(readonly=True, autocommit=True)
 cur = conn.cursor()
 
+# coverage gate: 'discovered' rows are feed-calendar knowledge only (the
+# daily discovery sweep ingests whole federations) — they must never reach
+# the shop. Only events on the filming path get published.
 cur.execute("""
-    SELECT e.id, e.event_name, e.event_date, e.event_country, e.source
-    FROM events e WHERE e.event_date IS NOT NULL ORDER BY e.event_date DESC""")
+    SELECT e.id, e.event_name, e.event_date, e.event_country, e.source, e.venue
+    FROM events e
+    WHERE e.event_date IS NOT NULL
+      AND COALESCE(e.coverage_status, 'filmed') <> 'discovered'
+    ORDER BY e.event_date DESC""")
 db_events = cur.fetchall()
 
 added_events, added_entries, skipped = [], 0, 0
 new_lines = []
 
-for ev_id, name, date, country_raw, source in db_events:
+for ev_id, name, date, country_raw, source, db_venue in db_events:
     name = clean(name)
     year = str(date.year)
     if int(year) < 2023:
@@ -179,7 +185,7 @@ for ev_id, name, date, country_raw, source in db_events:
         'baseId: %s' % json.dumps(bid),
         'country: %s' % json.dumps(country),
         'name: %s' % json.dumps(disp_name),
-        'venue: ""',
+        'venue: %s' % json.dumps(clean(db_venue or "")),
         'date: %s' % json.dumps(date.isoformat()),
         'body: %s' % json.dumps(body),
         'sections: []',

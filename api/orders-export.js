@@ -38,7 +38,7 @@ module.exports = async (req, res) => {
     const { data: orders, error } = await db.from("shop_orders")
       .select("id, status, customer_id, stripe_receipt_email, share_consent, include_faults, created_at")
       .eq("shop_order_source_id", 1).in("status", PAID)
-      .like("stripe_charge_id", "pi_%")
+      .or("stripe_charge_id.like.pi_%,stripe_charge_id.like.vch_%")
       .order("id", { ascending: false }).limit(1000);
     if (error) return res.status(500).json({ error: "orders lookup failed" });
 

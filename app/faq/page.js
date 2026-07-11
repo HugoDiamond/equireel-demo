@@ -47,6 +47,14 @@ export default function FaqPage() {
           <p>Watch real examples before you order — a cross country video, a social reel and a show jumping video are all on our homepage. <a href={href("/#samples")}>Watch the sample videos &rarr;</a></p>
         </details>
         <details>
+          <summary>Can I buy a gift voucher?</summary>
+          <p>Yes — any amount from £10/€10, emailed instantly to you or straight to the recipient with your message. It spends like cash on any video and is valid for 24 months; any unused balance stays on the code. <a href={href("/gift-vouchers")}>Buy a gift voucher &rarr;</a></p>
+        </details>
+        <details>
+          <summary>Where can I find videos I&rsquo;ve already bought?</summary>
+          <p>Every video you&rsquo;ve ever ordered lives in <a href={href("/my-videos")}>My Videos</a> — sign in with just the email you order with (no password needed), including orders from past seasons.</p>
+        </details>
+        <details>
           <summary>How long until my video is ready?</summary>
           <p>It depends on the event — the exact promise is shown <strong>under the order button</strong> before you pay. Some videos are ready to watch instantly, some arrive within the hour, and the rest within 5 days. Your video is emailed to you from info@equireel.com the moment it&rsquo;s ready — check your spam folder if you don&rsquo;t see it.</p>
         </details>

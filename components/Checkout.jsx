@@ -73,6 +73,11 @@ export default function Checkout({ order, onClose, onComplete }) {
   const [errs, setErrs] = useState({});
   const [busy, setBusy] = useState("");
   const [p, setP] = useState({ faults: true, music: true, sounds: true, public: true });
+  const [vOpen, setVOpen] = useState(false);
+  const [vCode, setVCode] = useState("");
+  const [vApplied, setVApplied] = useState(null); // { balance }
+  const [vErr, setVErr] = useState("");
+  const [vBusy, setVBusy] = useState(false);
 
   useEffect(() => {
     setEmail(purchases.email());
@@ -99,6 +104,39 @@ export default function Checkout({ order, onClose, onComplete }) {
     if (dvd) bump(first.ev.country, productPrices(first.ev).dvd);
     return [...sums.entries()].map(([s, n]) => s + n).join(" + ");
   }, [items, dvd, first]);
+
+  /* numeric total + settlement currency — voucher redemption needs both and
+     only works on single-currency orders in GBP/EUR */
+  const totalInfo = useMemo(() => {
+    const CODE = { us: "USD", ie: "EUR", fr: "EUR", be: "EUR" };
+    const codes = new Set(items.map((it) => CODE[it.ev.country] || "GBP"));
+    if (codes.size !== 1) return null;
+    const code = [...codes][0];
+    let amount = items.reduce((s, it) => s + itemLines(it).reduce((x, l) => x + l[1], 0), 0);
+    if (dvd) amount += productPrices(first.ev).dvd;
+    return { amount, code, sym: code === "EUR" ? "€" : code === "USD" ? "$" : "£" };
+  }, [items, dvd, first]);
+
+  const vDiscount = vApplied && totalInfo ? Math.min(vApplied.balance, totalInfo.amount) : 0;
+  const vCovers = vApplied && totalInfo && vDiscount >= totalInfo.amount;
+
+  async function applyVoucher() {
+    if (!totalInfo || !CHECKOUT_API) return;
+    setVBusy(true); setVErr("");
+    try {
+      const r = await fetch(CHECKOUT_API + "/voucher-check?code=" + encodeURIComponent(vCode.trim()) +
+        "&currency=" + totalInfo.code);
+      const d = await r.json().catch(() => ({}));
+      if (d.ok) { setVApplied({ balance: d.balance }); track("voucher_apply", {}); }
+      else {
+        setVApplied(null);
+        setVErr({ not_found: "Code not recognised — check for typos.", used: "That voucher has no balance left.",
+          expired: "That voucher has expired.", currency: "That voucher is in a different currency to this order.",
+          invalid: "That doesn't look like a voucher code." }[d.reason] || "Couldn't check the code — try again.");
+      }
+    } catch (e) { setVErr("Couldn't check the code — try again."); }
+    setVBusy(false);
+  }
 
   /* "Add Another Video" parks the whole order in the browse-basket and sends
      the visitor to that horse & rider's runs pages — the real listing, where
@@ -163,6 +201,25 @@ export default function Checkout({ order, onClose, onComplete }) {
           };
         })
       };
+      if (vApplied && vCode.trim()) payload.voucher = vCode.trim();
+
+      // fully voucher-covered: no card, no Stripe — pay straight from balance
+      if (vCovers) {
+        const r0 = await fetch(CHECKOUT_API + "/voucher-pay", {
+          method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload)
+        });
+        const d0 = await r0.json().catch(() => ({}));
+        if (r0.ok && d0.ok) {
+          items.forEach((it) => { if (it.en) basket.remove(it.en.id); });
+          window.location.href = href("/order-confirmed?voucher=1");
+          return;
+        }
+        setBusy("");
+        setErrs({ api: d0.message || "The voucher payment didn't go through — please try again." });
+        if (d0.error === "voucher") { setVApplied(null); setVErr(d0.message || "Voucher problem."); }
+        return;
+      }
+
       const r = await fetch(CHECKOUT_API + "/create-checkout", {
         method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload)
       });
@@ -172,6 +229,7 @@ export default function Checkout({ order, onClose, onComplete }) {
         window.location.href = data.url;
         return;
       }
+      if (data.error === "voucher") { setVApplied(null); setVErr(data.message || "Voucher problem."); }
       setBusy("");
       setErrs({ api: data.message || "We couldn't start the payment — please try again in a moment." });
     } catch (err) {
@@ -283,8 +341,37 @@ export default function Checkout({ order, onClose, onComplete }) {
                 </div>
               ))}
               {dvd && <div className="co2-line"><span>DVD copy (posted)</span><span>{money(productPrices(first.ev).dvd, first.ev.country)}</span></div>}
-              <div className="co2-line total"><span>Total</span><span>{totalStr}</span></div>
+              {vApplied && totalInfo && (
+                <div className="co2-line co2-voucher-line"><span>Gift voucher</span><span>−{totalInfo.sym}{vDiscount}</span></div>
+              )}
+              <div className="co2-line total"><span>{vApplied ? "To pay" : "Total"}</span>
+                <span>{vApplied && totalInfo ? totalInfo.sym + (totalInfo.amount - vDiscount) : totalStr}</span></div>
             </div>
+
+            {CHECKOUT_API && totalInfo && totalInfo.code !== "USD" && (
+              <div className="co2-voucher">
+                {!vOpen && !vApplied && (
+                  <button className="co2-personalise-link" onClick={() => setVOpen(true)}>Got a gift voucher?</button>
+                )}
+                {vOpen && !vApplied && (
+                  <div className="co2-voucher-row">
+                    <input placeholder="EQR-XXXX-XXXX" value={vCode} aria-label="Gift voucher code"
+                      onChange={(e) => { setVCode(e.target.value.toUpperCase()); setVErr(""); }}
+                      onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); applyVoucher(); } }} />
+                    <button className="btn" disabled={vBusy || vCode.trim().length < 8} onClick={applyVoucher}>
+                      {vBusy ? "Checking…" : "Apply"}
+                    </button>
+                  </div>
+                )}
+                {vApplied && (
+                  <p className="co2-voucher-ok">✓ Voucher applied — {totalInfo.sym}{vDiscount} off
+                    {vApplied.balance > vDiscount ? ` (${totalInfo.sym}${vApplied.balance - vDiscount} stays on the code)` : ""}.
+                    <button className="mv-signout" style={{ marginLeft: 8 }}
+                      onClick={() => { setVApplied(null); setVCode(""); }}>Remove</button></p>
+                )}
+                {vErr && <p className="aq-err">{vErr}</p>}
+              </div>
+            )}
 
             {browseTarget && (
               <button className="co2-addmore" onClick={addAnother}>+ Add Another Video</button>
@@ -329,7 +416,9 @@ export default function Checkout({ order, onClose, onComplete }) {
                   autoComplete="email" onChange={(e) => setEmail(e.target.value)} />
                 {errs.api && <p className="co2-apierr" role="alert">{errs.api}</p>}
                 <button className="btn primary big co2-pay" disabled={!!busy} onClick={payLive}>
-                  {busy ? "Opening secure checkout…" : "Pay " + totalStr}
+                  {busy ? (vCovers ? "Confirming…" : "Opening secure checkout…")
+                    : vCovers ? "Confirm order — paid by voucher"
+                    : "Pay " + (vApplied && totalInfo ? totalInfo.sym + (totalInfo.amount - vDiscount) : totalStr)}
                 </button>
                 <p className="co2-note" style={{ textAlign: "center" }}>
                   Secure payment by Stripe — card, Apple Pay and Google Pay.<br />

@@ -10,7 +10,41 @@ const {
   EVENTS, itemLines, PRODUCT_LABEL, COUNTRY_LABEL, CURRENCY_ID,
   equireelLabel, supabase, readRawBody
 } = require("./_lib");
-const { sendCustomerConfirmation, sendFulfilmentOrder } = require("./_email");
+const { sendCustomerConfirmation, sendFulfilmentOrder, sendFulfilmentNote, sendVoucherEmails } = require("./_email");
+const { makeCode, normCode, deductVoucher } = require("./_vouchers");
+
+/* gift-voucher purchase (metadata gv=1): mint the code, email both sides.
+   Idempotent via the unique stripe_session_id column. */
+async function handleVoucherPurchase(db, session, live) {
+  const md = session.metadata || {};
+  const email = (session.customer_details && session.customer_details.email) || session.customer_email || "";
+  const amount = parseInt(md.amt, 10) || Math.round((session.amount_total || 0) / 100);
+  const expires = new Date(); expires.setMonth(expires.getMonth() + 24);
+  const code = makeCode();
+  const { error } = await db.from("gift_vouchers").insert({
+    code, currency: md.cur === "EUR" ? "EUR" : "GBP",
+    initial_amount: amount, balance: amount,
+    purchaser_email: email.toLowerCase(),
+    recipient_email: md.re || null, recipient_name: md.rn || null,
+    message: md.msg || null,
+    status: live ? "active" : "test",
+    stripe_session_id: session.id,
+    expires_at: expires.toISOString().slice(0, 10)
+  });
+  if (error) {
+    if (String(error.message || "").includes("duplicate")) return { ok: true, duplicate: true };
+    console.error("voucher insert failed:", error.message);
+    return { ok: false };
+  }
+  try {
+    await sendVoucherEmails({
+      code, amount, currency: md.cur === "EUR" ? "EUR" : "GBP",
+      buyerEmail: email, recipientEmail: md.re || "", recipientName: md.rn || "",
+      message: md.msg || "", test: !live
+    });
+  } catch (e) { console.error("voucher emails failed:", e.message); }
+  return { ok: true, code };
+}
 
 function verify(raw, sig) {
   const Stripe = require("stripe");
@@ -40,6 +74,12 @@ module.exports = async (req, res) => {
 
   try {
     const md = session.metadata || {};
+
+    if (md.gv === "1") {
+      const out = await handleVoucherPurchase(supabase(), session, !!event.livemode);
+      return res.status(out.ok ? 200 : 500).json(out);
+    }
+
     const items = [];
     for (let i = 0; i < Number(md.n || 0); i++) {
       try { items.push(JSON.parse(md["i" + i])); } catch (e) { /* skip corrupt */ }
@@ -132,6 +172,22 @@ module.exports = async (req, res) => {
     });
     const { error: ierr } = await db.from("shop_order_items").insert(rows);
     if (ierr) console.error("items insert failed:", ierr.message);
+
+    // partial gift-voucher redemption travelled in metadata (vc=code, vd=amount):
+    // deduct now that payment succeeded; a failed deduct (double-spend race)
+    // never blocks the order — it alerts fulfilment to resolve by hand.
+    if (md.vc && Number(md.vd) > 0) {
+      try {
+        const { checkVoucher } = require("./_vouchers");
+        const chk = await checkVoucher(db, md.vc, currency);
+        const okDeduct = chk.ok && await deductVoucher(db, chk.voucher.id, Number(md.vd), order.id);
+        if (!okDeduct) {
+          await sendFulfilmentNote(`VOUCHER DEDUCT FAILED — order #${order.id}`,
+            `<p>Order #${order.id} used voucher <code>${normCode(md.vc)}</code> for ${md.vd} ${currency}
+             but the balance deduction failed (already spent?). Check gift_vouchers and resolve.</p>`);
+        }
+      } catch (e) { console.error("voucher deduct failed:", e.message); }
+    }
 
     // funnel: the purchase itself, server-side truth (never breaks the order)
     try {

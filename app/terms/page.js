@@ -29,6 +29,9 @@ export default function TermsPage() {
 
         <h2>3. Price and payment</h2>
         <p>The price is shown before you pay, in the currency of the event's region (&pound; UK, &euro; Europe, $ USA). Payment is taken securely by <strong>Stripe</strong> — card details go directly to Stripe and never touch our servers. Your order is confirmed by email once payment succeeds.</p>
+        <p><strong>Gift vouchers</strong> are valid for 24 months from purchase, spend like cash on any video in
+        their currency, and any unused balance stays on the code for next time. Vouchers can't be exchanged for
+        cash; if a voucher-paid order is refunded, the refund goes back onto the voucher code.</p>
 
         <h2>4. Delivery</h2>
         <p>Your video is delivered <strong>by email</strong> to the address you give at checkout. The delivery promise for your event is shown under the order button before you pay — some videos are ready instantly, some within the hour, and the rest within 5 days. Delivery emails come from info@equireel.com; add us to your contacts and check spam if you don't see it.</p>
