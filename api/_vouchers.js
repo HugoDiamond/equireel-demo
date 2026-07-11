@@ -31,20 +31,23 @@ async function checkVoucher(db, code, currency) {
 
 /* Atomic: only succeeds if the balance is still sufficient (double-spend guard).
    Returns true on success. */
-async function deductVoucher(db, voucherId, amount, orderId) {
+async function deductVoucher(db, voucherId, amount) {
   // optimistic read + conditional match on the read balance: an interleaved
   // spend changes balance, the match fails, and we report failure instead of
-  // silently double-spending. checkVoucher rejects balance<=0, so no status
-  // flip is needed here.
+  // silently double-spending. Balance ONLY — callers record the redemption
+  // ledger row AFTER their order write succeeds (a failed order restores the
+  // balance and must leave no ledger trace).
   const { data: cur } = await db.from("gift_vouchers").select("balance").eq("id", voucherId).single();
   if (!cur || cur.balance < amount) return false;
   const { data: upd, error: uerr } = await db.from("gift_vouchers")
     .update({ balance: cur.balance - amount })
     .eq("id", voucherId).eq("balance", cur.balance)
     .select("id");
-  if (uerr || !upd || !upd.length) return false;
-  await db.from("voucher_redemptions").insert({ voucher_id: voucherId, order_id: orderId || null, amount });
-  return true;
+  return !(uerr || !upd || !upd.length);
 }
 
-module.exports = { makeCode, normCode, checkVoucher, deductVoucher };
+async function recordRedemption(db, voucherId, orderId, amount) {
+  await db.from("voucher_redemptions").insert({ voucher_id: voucherId, order_id: orderId, amount });
+}
+
+module.exports = { makeCode, normCode, checkVoucher, deductVoucher, recordRedemption };

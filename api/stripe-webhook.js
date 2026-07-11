@@ -178,9 +178,10 @@ module.exports = async (req, res) => {
     // never blocks the order — it alerts fulfilment to resolve by hand.
     if (md.vc && Number(md.vd) > 0) {
       try {
-        const { checkVoucher } = require("./_vouchers");
+        const { checkVoucher, recordRedemption } = require("./_vouchers");
         const chk = await checkVoucher(db, md.vc, currency);
-        const okDeduct = chk.ok && await deductVoucher(db, chk.voucher.id, Number(md.vd), order.id);
+        const okDeduct = chk.ok && await deductVoucher(db, chk.voucher.id, Number(md.vd));
+        if (okDeduct) await recordRedemption(db, chk.voucher.id, order.id, Number(md.vd));
         if (!okDeduct) {
           await sendFulfilmentNote(`VOUCHER DEDUCT FAILED — order #${order.id}`,
             `<p>Order #${order.id} used voucher <code>${normCode(md.vc)}</code> for ${md.vd} ${currency}

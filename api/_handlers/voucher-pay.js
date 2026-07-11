@@ -9,7 +9,7 @@ const {
   EVENTS, CURRENCY_OF, itemLines, PRODUCT_LABEL, COUNTRY_LABEL, CURRENCY_ID,
   equireelLabel, cors, supabase
 } = require("../_lib");
-const { checkVoucher, deductVoucher, normCode } = require("../_vouchers");
+const { checkVoucher, deductVoucher, recordRedemption, normCode } = require("../_vouchers");
 const { sendCustomerConfirmation, sendFulfilmentOrder, sendFulfilmentNote } = require("../_email");
 
 module.exports = async (req, res) => {
@@ -41,8 +41,9 @@ module.exports = async (req, res) => {
       return res.status(400).json({ error: "voucher", message: "Voucher doesn't cover this order — pay the difference by card instead." });
     }
 
-    // deduct FIRST (atomic); restore on any later failure
-    if (!(await deductVoucher(db, chk.voucher.id, total, null))) {
+    // deduct FIRST (atomic); restore on any later failure. The redemption
+    // ledger row is written only after the order write succeeds.
+    if (!(await deductVoucher(db, chk.voucher.id, total))) {
       return res.status(409).json({ error: "voucher", message: "That voucher was just used elsewhere — check its balance." });
     }
 
@@ -99,8 +100,7 @@ module.exports = async (req, res) => {
       const { error: ierr } = await db.from("shop_order_items").insert(rows);
       if (ierr) console.error("voucher-pay items insert failed:", ierr.message);
 
-      await db.from("voucher_redemptions").update({ order_id: order.id })
-        .eq("voucher_id", chk.voucher.id).is("order_id", null);
+      await recordRedemption(db, chk.voucher.id, order.id, total);
 
       try {
         await db.from("web_events").insert({
