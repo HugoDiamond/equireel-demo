@@ -62,18 +62,28 @@ def fetch_board(host, es_id):
 
 
 def parse_board(html):
-    """-> [{bib, horse, cells: {fence: state}, xct}]"""
+    """-> [{bib, horse, cells: {fence: state}, pens: {fence: value}, xct}]
+
+    Cells are walked positionally (bare liveCell tds included) so fence
+    indices can never drift, and a penalties cell's inner text — the actual
+    penalty value (20 refusal, 11 frangible pin, 60 third refusal) — is
+    kept, not just the red flag."""
     fences = re.findall(r"<th>(\d+)</th>", html)
     rows = []
     for m in re.finditer(r"<tr><td>(\d+)</td><td>([^<]+)</td>(.*?)</tr>", html, re.S):
-        states = re.findall(r"liveCell ([\w-]+)", m.group(3))
+        cells, pens = {}, {}
+        for i, c in enumerate(re.finditer(r"<td class='liveCell ?([\w-]*)'>([^<]*)</td>",
+                                          m.group(3))):
+            if i >= len(fences):
+                break
+            state, inner = c.group(1), c.group(2).strip()
+            if state:
+                cells[fences[i]] = state
+                if state == "penalties" and inner.replace(".", "", 1).isdigit():
+                    pens[fences[i]] = float(inner) if "." in inner else int(inner)
         xct = re.search(r"text-center'>([^<]+)<", m.group(3))
-        rows.append({
-            "bib": m.group(1),
-            "horse": m.group(2).strip(),
-            "cells": {fences[i]: s for i, s in enumerate(states) if i < len(fences)},
-            "xct": xct.group(1).strip() if xct else None,
-        })
+        rows.append({"bib": m.group(1), "horse": m.group(2).strip(), "cells": cells,
+                     "pens": pens, "xct": xct.group(1).strip() if xct else None})
     return rows
 
 
@@ -96,6 +106,7 @@ def seed_from_db(cur, state, event_id, bib, now_iso):
             stored = {}
     if stored.get("source") == "es_liveboard":
         state[key] = {"fences": stored.get("fences", {}), "xct": stored.get("xct"),
+                      "pen_values": stored.get("penalty_values", {}),
                       "first_seen": stored.get("first_seen", now_iso),
                       "first_seen_progress": stored.get("first_seen_progress"),
                       "last_seen": stored.get("last_seen", stored.get("first_seen")),
@@ -120,6 +131,14 @@ def merge(state, event_id, rows, now_iso, first_tick=False):
                 if cell != "galloping" and prev != cell:
                     rec["fences"][fence] = cell
                     rec["dirty"] = True
+                    # judges corrected a penalty away — drop its stale value
+                    if cell != "penalties":
+                        rec.get("pen_values", {}).pop(fence, None)
+        for fence, val in r.get("pens", {}).items():
+            # numeric penalty at that fence; latest board value wins
+            if rec.setdefault("pen_values", {}).get(fence) != val:
+                rec["pen_values"][fence] = val
+                rec["dirty"] = True
         if r["xct"] and was_tracked and not rec.get("xct"):
             # we WITNESSED the transition to finished: finish ~= now (within
             # one poll), so actual start ~= now - elapsed. Only valid when
@@ -164,6 +183,7 @@ def persist(cur, state, poll_started):
         if rec["xct"] and "/" in rec["xct"]:
             elapsed = rec["xct"].split("/", 1)[1].strip()
         detail = json.dumps({"fences": rec["fences"], "xct": rec["xct"],
+                             "penalty_values": rec.get("pen_values", {}),
                              "first_seen": rec["first_seen"],
                              "first_seen_progress": rec.get("first_seen_progress"),
                              "last_seen": rec.get("last_seen"),
