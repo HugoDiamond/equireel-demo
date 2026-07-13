@@ -24,6 +24,7 @@ import re
 import sys
 import time
 
+import psycopg2
 import requests
 
 from .contracts import snapshot
@@ -97,7 +98,8 @@ def seed_from_db(cur, state, event_id, bib, now_iso):
         state[key] = {"fences": stored.get("fences", {}), "xct": stored.get("xct"),
                       "first_seen": stored.get("first_seen", now_iso),
                       "first_seen_progress": stored.get("first_seen_progress"),
-                      "last_seen": stored.get("last_seen", stored.get("first_seen"))}
+                      "last_seen": stored.get("last_seen", stored.get("first_seen")),
+                      "dirty": False}
 
 
 def merge(state, event_id, rows, now_iso, first_tick=False):
@@ -110,13 +112,14 @@ def merge(state, event_id, rows, now_iso, first_tick=False):
         rec = state.setdefault(key, {"fences": {}, "xct": None, "first_seen": now_iso,
                                      "first_seen_progress": None if first_tick
                                      else len(r["cells"]),
-                                     "last_seen": None})
+                                     "last_seen": None, "dirty": True})
         for fence, cell in r["cells"].items():
             prev = rec["fences"].get(fence)
             # definite states win; latest definite wins (judges correct scores)
             if cell in DEFINITE or prev is None or prev == "assumedclear":
-                if cell != "galloping":
+                if cell != "galloping" and prev != cell:
                     rec["fences"][fence] = cell
+                    rec["dirty"] = True
         if r["xct"] and was_tracked and not rec.get("xct"):
             # we WITNESSED the transition to finished: finish ~= now (within
             # one poll), so actual start ~= now - elapsed. Only valid when
@@ -132,8 +135,10 @@ def merge(state, event_id, rows, now_iso, first_tick=False):
                     pass
             if recent:
                 rec["finish_seen"] = now_iso
-        if r["xct"]:
+                rec["dirty"] = True
+        if r["xct"] and rec.get("xct") != r["xct"]:
             rec["xct"] = r["xct"]
+            rec["dirty"] = True
         rec["last_seen"] = now_iso
 
 
@@ -146,8 +151,14 @@ def _mmss_seconds(t):
 
 
 def persist(cur, state, poll_started):
-    written = 0
-    for (event_id, bib), rec in state.items():
+    """Write changed horses only, in deterministic key order. Ordering matters:
+    a second poller (PC fallback) writing the same rows in a different order
+    is a deadlock; same order is just a brief wait. Dirty-only writes keep the
+    transaction small so lock waits stay under the statement timeout."""
+    written = []
+    for (event_id, bib), rec in sorted(state.items()):
+        if not rec.get("dirty"):
+            continue
         pens = sum(1 for s in rec["fences"].values() if s == "penalties")
         elapsed = None
         if rec["xct"] and "/" in rec["xct"]:
@@ -161,7 +172,7 @@ def persist(cur, state, poll_started):
                               xc_elapsed_time=COALESCE(%s, xc_elapsed_time)
                        WHERE event_id=%s AND bib_number=%s""",
                     (detail, pens, elapsed, event_id, bib))
-        written += cur.rowcount
+        written.append((event_id, bib))
 
         # ACTUAL start time (editing-essential), two derivations, 'timing' rung:
         #  a) caught leaving the box: first sighting with <=2 fences progressed
@@ -193,6 +204,10 @@ def main():
 
     conn = connect()
     cur = conn.cursor()
+    # a write blocked by a concurrent poller cancels quickly and is retried
+    # next tick, instead of stalling into the pooler's own timeout
+    cur.execute("SET statement_timeout = '30s'")
+    conn.commit()
     tgts = targets(cur, today)
     if not tgts:
         print(f"{today}: no filmed ES events running — exiting")
@@ -218,9 +233,18 @@ def main():
                 seed_from_db(cur, state, event_id, r["bib"], now_iso)
             merge(state, event_id, rows, now_iso, first_tick)
         first_tick = False
-        n = persist(cur, state, poll_started)
-        conn.commit()
-        print(f"  {now_iso}: tracking {len(state)} horses, {n} rows updated")
+        # a failed persist (deadlock/lock timeout vs a concurrent poller) must
+        # never kill the shift: roll back, keep rows dirty, retry next tick —
+        # the merged in-memory state loses nothing.
+        try:
+            written = persist(cur, state, poll_started)
+            conn.commit()
+            for k in written:
+                state[k]["dirty"] = False
+            print(f"  {now_iso}: tracking {len(state)} horses, {len(written)} rows updated")
+        except psycopg2.Error as e:
+            conn.rollback()
+            print(f"  !! persist deferred to next tick: {type(e).__name__}")
         if once or datetime.datetime.now().time() >= end_of_day:
             break
         time.sleep(POLL_SECONDS)
