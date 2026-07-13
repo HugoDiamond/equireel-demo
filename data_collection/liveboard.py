@@ -76,7 +76,7 @@ def parse_board(html):
     return rows
 
 
-def seed_from_db(cur, state, event_id, bib, now_iso, progress):
+def seed_from_db(cur, state, event_id, bib, now_iso):
     """Stateless across restarts and runners: a horse we haven't got in
     memory is seeded from its stored fence map, so a runner picking up
     mid-day (GitHub Actions job handover, crash recovery) continues
@@ -96,16 +96,20 @@ def seed_from_db(cur, state, event_id, bib, now_iso, progress):
     if stored.get("source") == "es_liveboard":
         state[key] = {"fences": stored.get("fences", {}), "xct": stored.get("xct"),
                       "first_seen": stored.get("first_seen", now_iso),
-                      "first_seen_progress": stored.get("first_seen_progress", progress),
+                      "first_seen_progress": stored.get("first_seen_progress"),
                       "last_seen": stored.get("last_seen", stored.get("first_seen"))}
 
 
-def merge(state, event_id, rows, now_iso):
+def merge(state, event_id, rows, now_iso, first_tick=False):
     for r in rows:
         key = (event_id, r["bib"])
         was_tracked = key in state
+        # a rider first seen on the run's FIRST poll may be stale frozen-board
+        # content (yesterday's final window) — never derive a start time from
+        # that sighting. From tick 2 on, a new bib is a genuine appearance.
         rec = state.setdefault(key, {"fences": {}, "xct": None, "first_seen": now_iso,
-                                     "first_seen_progress": len(r["cells"]),
+                                     "first_seen_progress": None if first_tick
+                                     else len(r["cells"]),
                                      "last_seen": None})
         for fence, cell in r["cells"].items():
             prev = rec["fences"].get(fence)
@@ -164,7 +168,8 @@ def persist(cur, state, poll_started):
         #  b) derived from finish: start = first-finish-sighting - elapsed
         # both accurate to ~one poll interval; sheet-OCR/manual still outrank.
         actual = None
-        if rec.get("first_seen_progress", 99) <= 2:
+        fsp = rec.get("first_seen_progress")
+        if fsp is not None and fsp <= 2:
             actual = datetime.datetime.fromisoformat(rec["first_seen"])
         elif rec.get("finish_seen") and elapsed:
             secs = _mmss_seconds(elapsed)
@@ -196,6 +201,7 @@ def main():
 
     state = {}
     poll_started = datetime.datetime.now()
+    first_tick = True
     while True:
         now_iso = datetime.datetime.now().isoformat(timespec="seconds")
         for event_id, host, es_id, name, ext in tgts:
@@ -209,8 +215,9 @@ def main():
             snapshot("ES-LIVE", f"{es_id}-{now_iso.replace(':', '')}", html)
             rows = parse_board(html)
             for r in rows:
-                seed_from_db(cur, state, event_id, r["bib"], now_iso, len(r["cells"]))
-            merge(state, event_id, rows, now_iso)
+                seed_from_db(cur, state, event_id, r["bib"], now_iso)
+            merge(state, event_id, rows, now_iso, first_tick)
+        first_tick = False
         n = persist(cur, state, poll_started)
         conn.commit()
         print(f"  {now_iso}: tracking {len(state)} horses, {n} rows updated")
