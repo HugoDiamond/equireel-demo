@@ -53,6 +53,8 @@ def collect_event(conn, cur, event_id):
     total = 0
     for source, ext in cur.fetchall():
         try:
+            if source == config.SRC_ES and config.ES_MANUAL_MODE:
+                continue  # filmed ES events belong to the manual scraper for now
             if source == config.SRC_EI:
                 _, res = collect_ei(cur, event_id, ext)
             elif source == config.SRC_ES:

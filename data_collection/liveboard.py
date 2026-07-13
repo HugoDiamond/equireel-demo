@@ -27,6 +27,7 @@ import time
 import psycopg2
 import requests
 
+from . import config
 from .contracts import snapshot
 from .db import connect
 from .funnel import upsert_actual
@@ -188,9 +189,13 @@ def persist(cur, state, poll_started):
                              "first_seen_progress": rec.get("first_seen_progress"),
                              "last_seen": rec.get("last_seen"),
                              "source": "es_liveboard"})
+        # never overwrite the manual scraper's official fence record — its
+        # text format ("Fence 5B: 1 Refusal") is richer than board states.
+        # We only write over our own JSON ('{...') or an empty field.
         cur.execute("""UPDATE results SET xc_penalty_details=%s, fence_penalties=%s,
                               xc_elapsed_time=COALESCE(%s, xc_elapsed_time)
-                       WHERE event_id=%s AND bib_number=%s""",
+                       WHERE event_id=%s AND bib_number=%s
+                         AND (xc_penalty_details IS NULL OR xc_penalty_details LIKE '{%%')""",
                     (detail, pens, elapsed, event_id, bib))
         written.append((event_id, bib))
 
@@ -213,6 +218,9 @@ def persist(cur, state, poll_started):
 
 
 def main():
+    if config.ES_MANUAL_MODE and "--force" not in sys.argv:
+        print("ES_MANUAL_MODE: manual scrapers own filmed ES events — liveboard off (--force overrides)")
+        return
     once = "--once" in sys.argv
     today = datetime.date.today()
     if "--date" in sys.argv:

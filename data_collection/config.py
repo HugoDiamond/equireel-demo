@@ -10,6 +10,15 @@ DAYS_BACK = 30
 # 2026-07-11 ("complete items 8-13", item 9).
 WIDE_ENTRIES = True
 
+# MANUAL MODE for filmed ES events (David 2026-07-13): the authenticated ES
+# export (unified_scraper_v7) is richer — official fence codes, BE IDs — so
+# the manual scrapers own FILMED ES-family events for now. While True:
+#   - liveboard does not run (no fence/timing writes on filmed ES events)
+#   - daily + evening collection skip ES refs for filming-calendar events
+# Unfilmed ES events (buyer-overlap analytics), EI and H&C are unaffected.
+# Flip to False to hand filmed ES events back to the automated collector.
+ES_MANUAL_MODE = True
+
 # Source tags written to events.source / results.source / event_feed_refs.source
 SRC_EI = "EI-API"
 SRC_HC = "HC-API"

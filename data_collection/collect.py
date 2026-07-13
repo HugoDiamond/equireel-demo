@@ -121,9 +121,17 @@ def main():
     cur.execute(q, args)
     targets = cur.fetchall()
 
+    filmed = set()
+    if config.ES_MANUAL_MODE:
+        cur.execute("SELECT event_id FROM filming_calendar WHERE event_id IS NOT NULL")
+        filmed = {r[0] for r in cur.fetchall()}
+
     done = 0
     for event_id, source, ext_ref, name, coverage in targets:
         if not only_event and not wide and coverage not in statuses:
+            continue
+        if source == config.SRC_ES and event_id in filmed:
+            print(f"  {name} [ES]: skipped — manual scraper owns filmed ES events (ES_MANUAL_MODE)")
             continue
         try:
             if source == config.SRC_EI:
