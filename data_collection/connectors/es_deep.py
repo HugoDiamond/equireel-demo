@@ -10,6 +10,7 @@ POST /ajax/publicGateway.php with:
 Only the results table is HTML; everything else is structured JSON.
 """
 
+import datetime
 import re
 import time
 
@@ -82,6 +83,40 @@ def scheduled_starts(domain, es_id, phase_match=("cross", "xc")):
                 if start:
                     out.append({"section_letter": (s.get("section_name") or "").strip(),
                                 "start": start, "interval_min": interval_min})
+    return out
+
+
+_MONTHS = {m: i for i, m in enumerate(
+    ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"], 1)}
+
+
+def running_to_time(domain, es_id, year):
+    """OFFICIAL actual XC start times, from the running-to-time exporter
+    (found by David 2026-07-13): /exporter/running_to_time.php?eventid=N.
+    One <h3>Running to Time - XC on Day, Nth Mon</h3> + table per XC day;
+    runner cell is '<section letter><bib> Rider Name', Started/Scored cell
+    is HH:MM (minute precision, empty for non-starters).
+    -> [{"bib": str, "actual": datetime}]"""
+    host = domain if domain.startswith("www.") else "www." + domain
+    r = requests.get(f"https://{host}/exporter/running_to_time.php?eventid={es_id}",
+                     headers=H, timeout=60)
+    if r.status_code != 200 or "Running to Time" not in r.text:
+        return []
+    out = []
+    for part in re.split(r"Running to Time - ", r.text)[1:]:
+        m = re.match(r"XC on \w+, (\d+)(?:st|nd|rd|th)? (\w+)", part)
+        if not m:
+            continue  # SJ/dressage tables — not ours
+        month = _MONTHS.get(m.group(2)[:3].lower())
+        if not month:
+            continue
+        day = datetime.date(year, month, int(m.group(1)))
+        for tr in re.finditer(
+                r"<tr><td[^>]*>[A-Za-z]+(\d+)\s[^<]*</td><td>[^<]*</td><td>(\d{1,2}):(\d{2})</td>",
+                part):
+            out.append({"bib": tr.group(1),
+                        "actual": datetime.datetime.combine(
+                            day, datetime.time(int(tr.group(2)), int(tr.group(3))))})
     return out
 
 

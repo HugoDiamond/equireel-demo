@@ -13,7 +13,7 @@ from datetime import datetime, timedelta
 
 from .connectors import ei, hc, es_deep
 from .contracts import snapshot
-from .funnel import upsert_entries, upsert_results, upsert_scheduled
+from .funnel import upsert_actual, upsert_entries, upsert_results, upsert_scheduled
 
 
 def collect_es(cur, event_id, ext_ref):
@@ -69,6 +69,28 @@ def collect_es(cur, event_id, ext_ref):
         n_sched += upsert_scheduled(cur, event_id, payload)
     if n_sched:
         print(f"    scheduled starts: {n_sched}")
+
+    # OFFICIAL actual XC start times (running-to-time exporter, found by
+    # David). Minute precision, but authoritative: the liveboard's
+    # first-sighting runs systematically EARLY (the board lists riders
+    # before they start — Aston validation showed up to ~2 min), so the
+    # official record always overwrites 'timing' values. Same rank in the
+    # ladder; manual/legacy stay protected as ever.
+    cur.execute("SELECT event_date FROM events WHERE id=%s", (event_id,))
+    row = cur.fetchone()
+    year = (row[0].year if row and row[0] else datetime.now().year)
+    try:
+        rtt = es_deep.running_to_time(domain, es_id, year)
+    except Exception as e:
+        print(f"    !! running_to_time: {e}")
+        rtt = []
+    if rtt:
+        snapshot(config.SRC_ES, f"rtt-{es_id}",
+                 [{"bib": r["bib"], "actual": r["actual"].isoformat()} for r in rtt])
+        wrote = upsert_actual(cur, event_id,
+                              [{"bib": r["bib"], "actual": r["actual"]} for r in rtt],
+                              "timing")
+        print(f"    actual starts (official): {wrote}")
     return total_new, total_res
 
 
