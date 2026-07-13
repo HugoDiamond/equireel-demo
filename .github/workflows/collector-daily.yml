@@ -9,7 +9,8 @@ on:
 jobs:
   run:
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    # wide ES collection + running-to-time fetches take ~1h across ~50 events
+    timeout-minutes: 110
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
