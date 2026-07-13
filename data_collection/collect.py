@@ -18,6 +18,14 @@ from .funnel import upsert_entries, upsert_results, upsert_scheduled
 
 def collect_es(cur, event_id, ext_ref):
     """ext_ref format: '<domain>#<es event id>'"""
+    # A manual unified_scraper import replaces this event's rows (its rows
+    # carry source NULL). From then on the manual record owns the event —
+    # defer rather than write ES data over it.
+    cur.execute("SELECT 1 FROM results WHERE event_id=%s AND source IS NULL LIMIT 1",
+                (event_id,))
+    if cur.fetchone():
+        print("    manually-scraped event — ES collector deferring")
+        return 0, 0
     domain, es_id = ext_ref.split("#", 1)
     rows = es_deep.entries(domain, es_id)
     snapshot(config.SRC_ES, f"entries-{es_id}", [r["_raw"] for r in rows])

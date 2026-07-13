@@ -10,14 +10,16 @@ DAYS_BACK = 30
 # 2026-07-11 ("complete items 8-13", item 9).
 WIDE_ENTRIES = True
 
-# MANUAL MODE for filmed ES events (David 2026-07-13): the authenticated ES
-# export (unified_scraper_v7) is richer — official fence codes, BE IDs — so
-# the manual scrapers own FILMED ES-family events for now. While True:
-#   - liveboard does not run (no fence/timing writes on filmed ES events)
-#   - daily + evening collection skip ES refs for filming-calendar events
-# Unfilmed ES events (buyer-overlap analytics), EI and H&C are unaffected.
-# Flip to False to hand filmed ES events back to the automated collector.
-ES_MANUAL_MODE = True
+# ES collector vs manual scraper precedence (David 2026-07-13, revised):
+# the live-board poller is the ONLY fence-level source for UK events (the
+# ES export carries fence codes for USA-style flows only), so the collector
+# runs everywhere — but the moment a manual unified_scraper import is done
+# for an event, that manual record owns the event: collect_es detects the
+# manual rows (source IS NULL) and defers, the liveboard never overwrites
+# non-liveboard penalty details, and the start-time ladder protects manual
+# times. ES_MANUAL_MODE=True is the emergency stop that turns all ES
+# collection off for filmed events entirely.
+ES_MANUAL_MODE = False
 
 # Source tags written to events.source / results.source / event_feed_refs.source
 SRC_EI = "EI-API"
