@@ -150,6 +150,9 @@ def main():
         args.append(only_event)
     cur.execute(q, args)
     targets = cur.fetchall()
+    # filmed events FIRST: if the runner's timeout ever cuts the sweep short,
+    # only the wide analytics tail is lost, never editing-critical data
+    targets.sort(key=lambda t: t[4] not in statuses)
 
     filmed = set()
     if config.ES_MANUAL_MODE:

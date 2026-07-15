@@ -9,8 +9,9 @@ on:
 jobs:
   run:
     runs-on: ubuntu-latest
-    # wide ES collection + running-to-time fetches take ~1h across ~50 events
-    timeout-minutes: 110
+    # the wide sweep grows with discovery (~2h and rising); filmed events
+    # collect first so a timeout can only ever cost the analytics tail
+    timeout-minutes: 300
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
