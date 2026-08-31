@@ -15,6 +15,7 @@
   <url><loc>https://equireel-demo.vercel.app/events?country=fr</loc><priority>0.9</priority></url>
   <url><loc>https://equireel-demo.vercel.app/events?country=be</loc><priority>0.9</priority></url>
   <url><loc>https://equireel-demo.vercel.app/event?id=cornbury-house-international-young-horse-championships-2026</loc><priority>0.7</priority></url>
+  <url><loc>https://equireel-demo.vercel.app/event?id=aston-le-walls-pony-club-regional-championships-2026</loc><priority>0.7</priority></url>
   <url><loc>https://equireel-demo.vercel.app/event?id=wellington-international-2026</loc><priority>0.7</priority></url>
   <url><loc>https://equireel-demo.vercel.app/event?id=scottish-grassroots-eventing-festival-scone-palace-2026</loc><priority>0.7</priority></url>
   <url><loc>https://equireel-demo.vercel.app/event?id=scone-palace-international-2026</loc><priority>0.7</priority></url>
@@ -2624,6 +2625,7 @@
   <url><loc>https://equireel-demo.vercel.app/horses?name=Before%20Ugo%20Crazy</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Bejewel</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Bel%20Espoir%20Borderie</loc><priority>0.4</priority></url>
+  <url><loc>https://equireel-demo.vercel.app/horses?name=Belderrig%20More</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Belgraf%20du%20Pin</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Belgrave%20Irena</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Believe%20It</loc><priority>0.4</priority></url>
@@ -3334,6 +3336,7 @@
   <url><loc>https://equireel-demo.vercel.app/horses?name=Bulby%20Thatcher</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Bullards%20Fine%20Gin</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Bullards%20Mullingar</loc><priority>0.4</priority></url>
+  <url><loc>https://equireel-demo.vercel.app/horses?name=Bullaun%20Warrior</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Bulleit%20Rye</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Bulletproof</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Bullseye</loc><priority>0.4</priority></url>
@@ -4201,6 +4204,7 @@
   <url><loc>https://equireel-demo.vercel.app/horses?name=Chico%27s%20Man%20Vdf%20Z</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Chiddock%20Sign%20of%20the%20Times</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Chiddock%20Talk%20Time</loc><priority>0.4</priority></url>
+  <url><loc>https://equireel-demo.vercel.app/horses?name=Chiddock%20Times%20Square</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Child%E2%80%99s%20Play</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Chill%20Miss%20Imp</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Chillarella</loc><priority>0.4</priority></url>
@@ -4430,6 +4434,7 @@
   <url><loc>https://equireel-demo.vercel.app/horses?name=Clooney%20R</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Cloonhill%20Starlight</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Cloonlee%20Donn</loc><priority>0.4</priority></url>
+  <url><loc>https://equireel-demo.vercel.app/horses?name=Cloonnacusha%20Bruno</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Cloonross</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Cloonturk%20Rolling%20High</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Clopook%20Joker</loc><priority>0.4</priority></url>
@@ -6870,6 +6875,7 @@
   <url><loc>https://equireel-demo.vercel.app/horses?name=Ferdy</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Fergal%20Lippy</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Feria%20de%20Lessart</loc><priority>0.4</priority></url>
+  <url><loc>https://equireel-demo.vercel.app/horses?name=Fermoyle%20Prince</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Fern</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Fern%27s%20Illusion</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Fernandes</loc><priority>0.4</priority></url>
@@ -7440,6 +7446,7 @@
   <url><loc>https://equireel-demo.vercel.app/horses?name=French%20Gael</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=French%20Kiss</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=French%20Kiss%20Glad</loc><priority>0.4</priority></url>
+  <url><loc>https://equireel-demo.vercel.app/horses?name=Frenchfort%20Daisy</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Frenchfort%20Lorenzo</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Frenchill%20Lady%20Arrow</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Fresh%20Ambition</loc><priority>0.4</priority></url>
@@ -7492,6 +7499,7 @@
   <url><loc>https://equireel-demo.vercel.app/horses?name=Fun%20Run</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Fun%20Time%20Frankie</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Fun%20and%20Games</loc><priority>0.4</priority></url>
+  <url><loc>https://equireel-demo.vercel.app/horses?name=Funambule%20Diva</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Fune%20D%20Or%20M</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Fune%20D%27or%20M</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Funky%20Freddie</loc><priority>0.4</priority></url>
@@ -8284,6 +8292,7 @@
   <url><loc>https://equireel-demo.vercel.app/horses?name=Gus%20de%20Beausejour</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Gwada%20Mour</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Gwen</loc><priority>0.4</priority></url>
+  <url><loc>https://equireel-demo.vercel.app/horses?name=Gwithian%20Gabriel</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Gwrthafarn%20Guto</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Gypsie%20du%20Loir</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Gypsy</loc><priority>0.4</priority></url>
@@ -8803,6 +8812,7 @@
   <url><loc>https://equireel-demo.vercel.app/horses?name=Hilin%20Temptress</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Hill%20Billy%20Oak</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Hill%20Livery%20Hooligans</loc><priority>0.4</priority></url>
+  <url><loc>https://equireel-demo.vercel.app/horses?name=Hillam%20the%20Haribo</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Hillberry</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Hillbury%20Billies</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Hillcliffe%20Royal%20Engagement</loc><priority>0.4</priority></url>
@@ -11928,6 +11938,7 @@
   <url><loc>https://equireel-demo.vercel.app/horses?name=Mickleholme%20Diavita</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Mickleholme%20Dulano</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Mickleholme%20Epsilon</loc><priority>0.4</priority></url>
+  <url><loc>https://equireel-demo.vercel.app/horses?name=Micko%202</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Micks%20Boy</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Micky%20Joe</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Micron%20Joy</loc><priority>0.4</priority></url>
@@ -14279,6 +14290,7 @@
   <url><loc>https://equireel-demo.vercel.app/horses?name=Redtail%20Angel%E2%80%99s%20Envy</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Redtail%20Penumbra</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Redtail%20Zigzag</loc><priority>0.4</priority></url>
+  <url><loc>https://equireel-demo.vercel.app/horses?name=Redvear%20Crown%20Jewel</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Redwood%20Quality</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Reel%20Timba</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Reenascreena%20Zip</loc><priority>0.4</priority></url>
@@ -15134,6 +15146,7 @@
   <url><loc>https://equireel-demo.vercel.app/horses?name=Shanganagh%20Silver</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Shania</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Shankill%20Bobby</loc><priority>0.4</priority></url>
+  <url><loc>https://equireel-demo.vercel.app/horses?name=Shanna%20Dun%20An%20Oir%20Star%20Lite</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Shanna%20Gizmo</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Shannaghmore%20Skys%20the%20Limit</loc><priority>0.4</priority></url>
   <url><loc>https://equireel-demo.vercel.app/horses?name=Shannon%20Lad</loc><priority>0.4</priority></url>
